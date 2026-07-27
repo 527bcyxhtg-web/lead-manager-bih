@@ -60,11 +60,20 @@ function tryRestoreSession(){
 }
 function doLogout(){currentUser=null;localStorage.removeItem(DB+'_session');showLogin()}
 function showLogin(){document.getElementById('loginOverlay').classList.remove('hidden');document.getElementById('appLayout').classList.remove('active')}
-function showApp(){document.getElementById('loginOverlay').classList.add('hidden');document.getElementById('appLayout').classList.add('active');render()}
+function showApp(){document.getElementById('loginOverlay').classList.add('hidden');document.getElementById('appLayout').classList.add('active');
+  if(currentUser.country!=='all'){currentCountry=currentUser.country;currentAgent=currentUser.id;currentView='agent-contacts'}
+  render()}
 
 function switchView(v){currentView=v;currentAgent=null;selectedContact=null;render()}
-function switchCountry(c){currentCountry=c;currentAgent=null;selectedContact=null;render()}
+function switchCountry(c){currentCountry=c;currentAgent=null;selectedContact=null;autoSelectIfSingle();render()}
 function selectAgent(uid){currentAgent=uid;currentView='agent-contacts';selectedContact=null;render()}
+function autoSelectIfSingle(){
+  /* When non-admin user clicks their country, auto-open their contacts */
+  if(currentUser.country!=='all'){
+    currentAgent=currentUser.id;
+    currentView='agent-contacts';
+  }
+}
 function selectContact(c){selectedContact=c;renderAIContent()}
 
 function render(){
@@ -93,7 +102,7 @@ function updateSidebar(){
     icons.push({id:'hr',icon:'\uD83C\uDDED\uD83C\uDDDD',tip:'Hrvatska'});
     icons.push({id:'rs',icon:'\uD83C\uDDF7\uD83C\uDDF8',tip:'Srbija'});
   }else{
-    icons.push({id:currentUser.country,icon:COUNTRY_FLAGS[currentCountry],tip:COUNTRY_NAMES[currentCountry]});
+    icons.push({id:currentUser.country,icon:COUNTRY_FLAGS[currentUser.country],tip:COUNTRY_NAMES[currentUser.country]});
   }
   sb.innerHTML=icons.map(function(i){
     var active=(currentView===i.id||(currentView==='country'&&currentCountry===i.id)||(currentView==='agent-contacts'&&currentCountry===i.id))?'active':'';
