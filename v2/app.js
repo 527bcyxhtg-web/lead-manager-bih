@@ -378,7 +378,7 @@ window.openContact=function(id){
   if(c.status==='done'){
     h+='<div class="modal-section-title">Prodaja</div>';
     h+='<div class="status-controls">';
-    <h+='<button class="sale-btn '+(c.sale==='yes'?'active-yes':'')+'" onclick="setSale(\''+c.id+'\',\'yes\')">💰 Uspješna</button>';
+    h+='<button class="sale-btn '+(c.sale==='yes'?'active-yes':'')+'" onclick="setSale(\''+c.id+'\',\'yes\')">💰 Uspješna</button>';
     h+='<button class="sale-btn '+(c.sale==='no'?'active-no':'')+'" onclick="setSale(\''+c.id+'\',\'no\')">🚫 Neuspješna</button>';
     h+='</div>';
   }
