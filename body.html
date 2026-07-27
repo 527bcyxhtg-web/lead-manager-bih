@@ -1,0 +1,84 @@
+<canvas id="three-canvas"></canvas>
+<div id="cursorGlow"></div>
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<div class="orb orb-3"></div>
+
+<div id="loader"><div class="loader-ring"></div><div class="loader-text">LeadFlow BiH</div></div>
+
+<div class="settings-panel">
+  <button class="settings-btn" onclick="toggleSettings()" title="Postavke">⚙️</button>
+  <div class="settings-dropdown" id="settingsDrop">
+    <div class="setting-group">
+      <div class="setting-label">Tema</div>
+      <div class="mode-toggle">
+        <button class="mode-btn active" onclick="setMode('dark',this)">🌙 Dark</button>
+        <button class="mode-btn" onclick="setMode('light',this)">☀️ Light</button>
+      </div>
+    </div>
+    <div class="setting-group">
+      <div class="setting-label">Boja akcenta</div>
+      <div class="color-row">
+        <div class="color-dot active" style="background:#b9ff66" onclick="setAccent('#b9ff66','#39ff14','#00ff88',this)" title="Fluoro Zeleno"></div>
+        <div class="color-dot" style="background:#ff3e6c" onclick="setAccent('#ff3e6c','#ff6b8a','#ff1744',this)" title="Fluoro Crveno"></div>
+        <div class="color-dot" style="background:#ffea00" onclick="setAccent('#ffea00','#ffd600','#ffab00',this)" title="Fluoro Žuto"></div>
+        <div class="color-dot" style="background:#00e5ff" onclick="setAccent('#00e5ff','#18ffff','#00b0ff',this)" title="Fluoro Plavo"></div>
+        <div class="color-dot" style="background:#e040fb" onclick="setAccent('#e040fb','#ea80fc','#d500f9',this)" title="Fluoro Ljubičasto"></div>
+        <div class="color-dot" style="background:#ff9100" onclick="setAccent('#ff9100','#ffab40','#ff6d00',this)" title="Fluoro Narančasto"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<section class="hero">
+  <div class="hero-mesh"></div>
+  <div class="hero-content">
+    <div class="hero-badge"><span class="dot"></span> Lead Manager · BiH</div>
+    <h1>
+      <span class="line"><span>Upravljaj svojim</span></span>
+      <span class="line"><span><span class="gradient">leadovima</span> efikasno</span></span>
+    </h1>
+    <p>Praćenje 73 kontakata diljem Bosne i Hercegovine. Od frizerskih salona do advokatskih kancelarija — sve na jednom mjestu.</p>
+  </div>
+</section>
+
+<div class="container">
+  <section>
+    <div class="section-label">Pregled</div>
+    <div class="bento" id="bentoGrid"></div>
+  </section>
+
+  <svg width="0" height="0" style="position:absolute">
+    <defs><linearGradient id="pGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#b9ff66"/><stop offset="100%" stop-color="#39ff14"/></linearGradient></defs>
+  </svg>
+
+  <section>
+    <div class="section-label">Pretraga &amp; filteri</div>
+    <div class="controls">
+      <div class="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="searchInput" placeholder="Pretraga po firmi, gradu, kategoriji…" autocomplete="off">
+      </div>
+      <div class="filter-bar" id="filterBar">
+        <button class="filter-pill active" data-filter="all">Svi <span class="ct" id="cAll"></span></button>
+        <button class="filter-pill" data-filter="pending">⏳ Čeka <span class="ct" id="cPen"></span></button>
+        <button class="filter-pill" data-filter="progress">🔄 U toku <span class="ct" id="cPro"></span></button>
+        <button class="filter-pill" data-filter="done">✅ Završeno <span class="ct" id="cDon"></span></button>
+        <button class="filter-pill" data-filter="called">📞 Zvali <span class="ct" id="cCal"></span></button>
+        <div class="filter-sep"></div>
+        <button class="act-btn" onclick="expCSV()">⬇ CSV</button>
+        <button class="act-btn" onclick="expJSON()">⬇ JSON</button>
+        <button class="act-btn danger" onclick="resetAll()">↺ Reset</button>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-label">Kontakti <span id="contactCount" style="margin-left:8px;font-weight:400;color:var(--text3)"></span></div>
+    <div class="contact-grid" id="contactGrid"></div>
+    <div class="empty" id="emptyState" style="display:none"><p>🔍 Nema rezultata</p></div>
+  </section>
+</div>
+
+<div class="toast-box" id="toastBox"></div>
+<div class="footer"><p>Built with <span>LeadFlow</span> · 73 kontakata · Bosna i Hercegovina</p></div>

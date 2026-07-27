@@ -2,67 +2,73 @@
 <html lang="bs">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>LeadFlow BiH — Lead Manager</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-/* ═══════════════════════════════════════════════════════════
-   CSS — LeadFlow BiH · Awwwards-level design
-   ═══════════════════════════════════════════════════════════ */
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
 :root{
   --bg:#050508;--bg2:#0a0a10;--surface:rgba(255,255,255,.03);
   --glass:rgba(255,255,255,.04);--glass-border:rgba(255,255,255,.08);
-  --glass-hover:rgba(255,255,255,.07);
-  --accent:#7c5cfc;--accent2:#38bdf8;--accent3:#f472b6;
-  --grad:linear-gradient(135deg,#7c5cfc,#38bdf8);
-  --grad2:linear-gradient(135deg,#f472b6,#7c5cfc);
+  --accent:#b9ff66;--accent2:#39ff14;--accent3:#00ff88;
+  --grad:linear-gradient(135deg,#b9ff66,#39ff14);
   --text:#e8e8f0;--text2:#8888a0;--text3:#555570;
   --radius:16px;--radius-sm:10px;--radius-xs:6px;
   --font-h:'Space Grotesk',system-ui,sans-serif;
   --font-b:'Inter',system-ui,sans-serif;
 }
-html{scroll-behavior:smooth;scrollbar-width:thin;scrollbar-color:rgba(124,92,252,.3) transparent}
-::-webkit-scrollbar{width:6px}
-::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:rgba(124,92,252,.25);border-radius:3px}
-::-webkit-scrollbar-thumb:hover{background:rgba(124,92,252,.45)}
-body{background:var(--bg);color:var(--text);font-family:var(--font-b);line-height:1.6;overflow-x:hidden;min-height:100vh}
+/* Light mode */
+body.light{--bg:#f5f5f7;--bg2:#ececec;--surface:rgba(0,0,0,.03);
+  --glass:rgba(255,255,255,.7);--glass-border:rgba(0,0,0,.08);
+  --text:#1a1a2e;--text2:#555;--text3:#999}
+body.light .card-av{border-color:rgba(0,0,0,.08)}
+body.light .settings-dropdown,body.light .toast{background:rgba(255,255,255,.95)}
+body.light #loader{background:var(--bg)}
+
+html{scroll-behavior:smooth;scrollbar-width:thin;scrollbar-color:rgba(185,255,102,.3) transparent}
+::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:rgba(185,255,102,.25);border-radius:3px}
+body{background:var(--bg);color:var(--text);font-family:var(--font-b);line-height:1.6;overflow-x:hidden;min-height:100vh;transition:background .4s,color .4s}
 a{color:var(--accent);text-decoration:none}
 
-/* ── Loading Screen ── */
-#loader{position:fixed;inset:0;z-index:9999;background:var(--bg);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:24px;transition:opacity .8s ease,visibility .8s ease}
+#loader{position:fixed;inset:0;z-index:9999;background:var(--bg);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:24px;transition:opacity .8s,visibility .8s}
 #loader.hide{opacity:0;visibility:hidden;pointer-events:none}
-.loader-logo{width:80px;height:80px;position:relative}
-.loader-logo svg{width:100%;height:100%}
-.loader-ring{animation:loaderSpin 1.4s cubic-bezier(.4,0,.2,1) infinite}
-@keyframes loaderSpin{0%{stroke-dashoffset:280;transform:rotate(0)}50%{stroke-dashoffset:70;transform:rotate(180deg)}100%{stroke-dashoffset:280;transform:rotate(360deg)}}
-.loader-text{font-family:var(--font-h);font-size:1.1rem;font-weight:600;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:.05em;animation:loaderPulse 1.5s ease-in-out infinite}
-@keyframes loaderPulse{0%,100%{opacity:.6}50%{opacity:1}}
+.loader-ring{width:80px;height:80px;border:3px solid rgba(185,255,102,.1);border-top-color:var(--accent);border-radius:50%;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loader-text{font-family:var(--font-h);font-size:1.1rem;font-weight:600;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 
-/* ── Cursor Glow ── */
-#cursorGlow{position:fixed;width:400px;height:400px;border-radius:50%;background:radial-gradient(circle,rgba(124,92,252,.06) 0%,transparent 70%);pointer-events:none;z-index:1;transform:translate(-50%,-50%);transition:left .15s ease-out,top .15s ease-out;will-change:left,top}
+#cursorGlow{position:fixed;width:500px;height:500px;border-radius:50%;background:radial-gradient(circle,rgba(185,255,102,.07) 0%,transparent 70%);pointer-events:none;z-index:1;transform:translate(-50%,-50%);transition:left .12s,top .12s;will-change:left,top}
+.orb{position:fixed;border-radius:50%;filter:blur(100px);opacity:.12;pointer-events:none;z-index:0}
+.orb-1{width:600px;height:600px;background:#b9ff66;top:-15%;left:-10%;animation:ob1 25s ease-in-out infinite}
+.orb-2{width:450px;height:450px;background:#39ff14;bottom:-10%;right:-5%;animation:ob2 30s ease-in-out infinite}
+.orb-3{width:400px;height:400px;background:#00ff88;top:35%;left:45%;animation:ob3 20s ease-in-out infinite}
+@keyframes ob1{0%,100%{transform:translate(0,0)}33%{transform:translate(60px,40px)}66%{transform:translate(-30px,80px)}}
+@keyframes ob2{0%,100%{transform:translate(0,0)}33%{transform:translate(-50px,-60px)}66%{transform:translate(40px,-30px)}}
+@keyframes ob3{0%,100%{transform:translate(0,0)}50%{transform:translate(-80px,50px)}}
 
-/* ── Floating Orbs ── */
-.orb{position:fixed;border-radius:50%;filter:blur(80px);opacity:.15;pointer-events:none;z-index:0;will-change:transform}
-.orb-1{width:500px;height:500px;background:#7c5cfc;top:-10%;left:-5%;animation:orbFloat1 25s ease-in-out infinite}
-.orb-2{width:400px;height:400px;background:#38bdf8;bottom:-10%;right:-5%;animation:orbFloat2 30s ease-in-out infinite}
-.orb-3{width:350px;height:350px;background:#f472b6;top:40%;left:50%;animation:orbFloat3 20s ease-in-out infinite}
-@keyframes orbFloat1{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(60px,40px) scale(1.1)}66%{transform:translate(-30px,80px) scale(.95)}}
-@keyframes orbFloat2{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(-50px,-60px) scale(1.05)}66%{transform:translate(40px,-30px) scale(.9)}}
-@keyframes orbFloat3{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-80px,50px) scale(1.15)}}
+#three-canvas{position:fixed;inset:0;z-index:0;pointer-events:none}
 
-/* ── Hero Section ── */
-.hero{position:relative;min-height:60vh;display:flex;align-items:center;justify-content:center;text-align:center;padding:80px 24px 60px;overflow:hidden;z-index:1}
-.hero-mesh{position:absolute;inset:0;background:
-  radial-gradient(ellipse 60% 50% at 20% 30%,rgba(124,92,252,.12) 0%,transparent 60%),
-  radial-gradient(ellipse 50% 60% at 80% 70%,rgba(56,189,248,.1) 0%,transparent 60%),
-  radial-gradient(ellipse 40% 40% at 50% 50%,rgba(244,114,182,.08) 0%,transparent 50%);z-index:0;animation:meshShift 20s ease-in-out infinite alternate}
-@keyframes meshShift{0%{filter:hue-rotate(0deg)}100%{filter:hue-rotate(25deg)}}
+.settings-panel{position:fixed;top:20px;right:20px;z-index:1000;display:flex;flex-direction:column;gap:8px;align-items:flex-end}
+.settings-btn{width:48px;height:48px;border-radius:50%;border:1px solid var(--glass-border);background:rgba(15,15,25,.8);backdrop-filter:blur(20px);color:var(--text);font-size:1.2rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .3s}
+.settings-btn:hover{border-color:var(--accent);box-shadow:0 0 20px rgba(185,255,102,.2)}
+.settings-dropdown{position:absolute;top:56px;right:0;background:rgba(15,15,25,.95);border:1px solid var(--glass-border);border-radius:var(--radius);padding:16px;backdrop-filter:blur(20px);display:none;min-width:240px;box-shadow:0 8px 40px rgba(0,0,0,.5)}
+.settings-dropdown.show{display:block;animation:dropIn .2s ease}
+@keyframes dropIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+.setting-group{margin-bottom:16px}.setting-group:last-child{margin-bottom:0}
+.setting-label{font-size:.72rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--text2);margin-bottom:8px}
+.color-row{display:flex;gap:8px;flex-wrap:wrap}
+.color-dot{width:32px;height:32px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:all .2s}
+.color-dot:hover{transform:scale(1.15)}
+.color-dot.active{border-color:#fff;box-shadow:0 0 12px currentColor}
+.mode-toggle{display:flex;gap:4px;background:rgba(255,255,255,.05);border-radius:8px;padding:4px}
+.mode-btn{flex:1;padding:6px 12px;border:none;background:transparent;color:var(--text2);font-family:var(--font-b);font-size:.8rem;border-radius:6px;cursor:pointer;transition:all .2s}
+.mode-btn.active{background:var(--accent);color:#000;font-weight:600}
+
+.hero{position:relative;min-height:55vh;display:flex;align-items:center;justify-content:center;text-align:center;padding:80px 24px 40px;overflow:hidden;z-index:1}
+.hero-mesh{position:absolute;inset:0;background:radial-gradient(ellipse 60% 50% at 20% 30%,rgba(185,255,102,.08) 0%,transparent 60%),radial-gradient(ellipse 50% 60% at 80% 70%,rgba(57,255,20,.06) 0%,transparent 60%);z-index:0}
 .hero-content{position:relative;z-index:1;max-width:900px}
-.hero-badge{display:inline-flex;align-items:center;gap:8px;padding:6px 16px;border-radius:100px;background:rgba(124,92,252,.1);border:1px solid rgba(124,92,252,.2);font-size:.75rem;font-weight:500;color:var(--accent);letter-spacing:.08em;text-transform:uppercase;margin-bottom:24px;backdrop-filter:blur(10px)}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;padding:6px 16px;border-radius:100px;background:rgba(185,255,102,.08);border:1px solid rgba(185,255,102,.15);font-size:.75rem;font-weight:500;color:var(--accent);letter-spacing:.08em;text-transform:uppercase;margin-bottom:24px}
 .hero-badge .dot{width:6px;height:6px;border-radius:50%;background:var(--accent);animation:dotPulse 2s ease-in-out infinite}
 @keyframes dotPulse{0%,100%{opacity:.4;transform:scale(.8)}50%{opacity:1;transform:scale(1.2)}}
 .hero h1{font-family:var(--font-h);font-size:clamp(2.5rem,6vw,4.5rem);font-weight:700;line-height:1.1;margin-bottom:16px;letter-spacing:-.02em}
@@ -71,168 +77,128 @@ a{color:var(--accent);text-decoration:none}
 .hero h1 .line:nth-child(2) span{animation-delay:.15s}
 .hero h1 .gradient{background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
 @keyframes textReveal{to{transform:translateY(0)}}
-.hero p{font-size:clamp(1rem,2vw,1.2rem);color:var(--text2);max-width:600px;margin:0 auto 32px;opacity:0;animation:fadeUp .8s .4s ease forwards}
+.hero p{font-size:clamp(1rem,2vw,1.15rem);color:var(--text2);max-width:600px;margin:0 auto;opacity:0;animation:fadeUp .8s .4s ease forwards;transform:translateY(20px)}
 @keyframes fadeUp{to{opacity:1;transform:translateY(0)}}
-.hero p{transform:translateY(20px)}
 
-/* ── Container / Section ── */
 .container{max-width:1280px;margin:0 auto;padding:0 24px;position:relative;z-index:1}
-section{margin-bottom:64px}
+section{margin-bottom:48px}
 .section-label{font-family:var(--font-h);font-size:.75rem;font-weight:600;letter-spacing:.15em;text-transform:uppercase;color:var(--accent);margin-bottom:12px;display:flex;align-items:center;gap:8px}
 .section-label::before{content:'';width:20px;height:1px;background:var(--accent)}
 
-/* ── Bento Stats Grid ── */
-.bento{display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:auto auto;gap:16px;margin-bottom:48px}
-.bento-card{background:var(--glass);border:1px solid var(--glass-border);border-radius:var(--radius);padding:28px;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);position:relative;overflow:hidden;transition:transform .4s cubic-bezier(.16,1,.3,1),border-color .4s ease,box-shadow .4s ease;opacity:0;transform:translateY(30px)}
-.bento-card.visible{opacity:1;transform:translateY(0);transition:opacity .6s cubic-bezier(.16,1,.3,1),transform .6s cubic-bezier(.16,1,.3,1),border-color .4s ease,box-shadow .4s ease}
-.bento-card:hover{border-color:rgba(124,92,252,.25);box-shadow:0 0 40px rgba(124,92,252,.08)}
-.bento-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.08),transparent)}
+.bento{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:32px}
+.bento-card{background:var(--glass);border:1px solid var(--glass-border);border-radius:var(--radius);padding:24px;backdrop-filter:blur(20px);position:relative;overflow:hidden;opacity:0;transform:translateY(20px);transition:all .5s cubic-bezier(.16,1,.3,1)}
+.bento-card.visible{opacity:1;transform:translateY(0)}
+.bento-card:hover{border-color:rgba(185,255,102,.25);box-shadow:0 0 30px rgba(185,255,102,.06)}
 .bento-card.span-2{grid-column:span 2}
-.bento-card.span-row-2{grid-row:span 2}
-.bento-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;margin-bottom:16px;background:rgba(124,92,252,.1)}
-.bento-value{font-family:var(--font-h);font-size:2.2rem;font-weight:700;line-height:1;margin-bottom:4px}
-.bento-label{font-size:.85rem;color:var(--text2)}
-.bento-card.span-2 .bento-value{font-size:2.8rem}
-.bento-progress{margin-top:16px}
+.bento-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;margin-bottom:12px}
+.bento-value{font-family:var(--font-h);font-size:2rem;font-weight:700;line-height:1;margin-bottom:4px}
+.bento-label{font-size:.82rem;color:var(--text2)}
 
-/* ── Progress Ring ── */
-.progress-ring-wrap{display:flex;align-items:center;gap:20px}
-.progress-ring{position:relative;width:120px;height:120px;flex-shrink:0}
+.progress-ring{position:relative;width:110px;height:110px;flex-shrink:0}
 .progress-ring svg{width:100%;height:100%;transform:rotate(-90deg)}
 .progress-ring .bg{fill:none;stroke:rgba(255,255,255,.05);stroke-width:6}
-.progress-ring .fg{fill:none;stroke:url(#progressGrad);stroke-width:6;stroke-linecap:round;stroke-dasharray:314;stroke-dashoffset:314;transition:stroke-dashoffset 1.5s cubic-bezier(.16,1,.3,1)}
-.progress-ring .center-text{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--font-h);font-size:1.6rem;font-weight:700}
+.progress-ring .fg{fill:none;stroke:url(#pGrad);stroke-width:6;stroke-linecap:round;stroke-dasharray:314;stroke-dashoffset:314;transition:stroke-dashoffset 1.5s cubic-bezier(.16,1,.3,1)}
+.progress-center{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--font-h);font-size:1.5rem;font-weight:700}
 
-/* ── Search & Filters ── */
-.controls{margin-bottom:40px;opacity:0;transform:translateY(20px);transition:all .6s cubic-bezier(.16,1,.3,1)}
-.controls.visible{opacity:1;transform:translateY(0)}
-.search-wrap{position:relative;margin-bottom:20px}
-.search-wrap input{width:100%;padding:16px 20px 16px 52px;border-radius:14px;border:1px solid var(--glass-border);background:var(--glass);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);color:var(--text);font-family:var(--font-b);font-size:1rem;outline:none;transition:border-color .3s,box-shadow .3s}
-.search-wrap input:focus{border-color:rgba(124,92,252,.4);box-shadow:0 0 0 3px rgba(124,92,252,.1),0 0 40px rgba(124,92,252,.08)}
+.controls{margin-bottom:32px}
+.search-wrap{position:relative;margin-bottom:16px}
+.search-wrap input{width:100%;padding:14px 18px 14px 48px;border-radius:14px;border:1px solid var(--glass-border);background:var(--glass);backdrop-filter:blur(20px);color:var(--text);font-family:var(--font-b);font-size:.95rem;outline:none;transition:border-color .3s,box-shadow .3s}
+.search-wrap input:focus{border-color:rgba(185,255,102,.4);box-shadow:0 0 0 3px rgba(185,255,102,.08)}
 .search-wrap input::placeholder{color:var(--text3)}
-.search-icon{position:absolute;left:18px;top:50%;transform:translateY(-50%);color:var(--text3);pointer-events:none;font-size:1.1rem}
+.search-icon{position:absolute;left:16px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:1.1rem}
+
 .filter-bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
-.filter-pill{padding:8px 18px;border-radius:100px;border:1px solid var(--glass-border);background:var(--glass);color:var(--text2);font-family:var(--font-b);font-size:.82rem;font-weight:500;cursor:pointer;transition:all .3s cubic-bezier(.16,1,.3,1);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);user-select:none}
-.filter-pill:hover{border-color:rgba(124,92,252,.3);color:var(--text)}
-.filter-pill.active{background:rgba(124,92,252,.15);border-color:rgba(124,92,252,.35);color:#c4b5fd;box-shadow:0 0 20px rgba(124,92,252,.1)}
-.filter-pill .count{margin-left:6px;font-size:.75rem;opacity:.7}
-.filter-sep{width:1px;height:24px;background:var(--glass-border);margin:0 8px}
-.action-btn{padding:8px 16px;border-radius:var(--radius-xs);border:1px solid var(--glass-border);background:var(--glass);color:var(--text2);font-family:var(--font-b);font-size:.8rem;font-weight:500;cursor:pointer;transition:all .3s ease;backdrop-filter:blur(10px)}
-.action-btn:hover{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.15);color:var(--text);transform:translateY(-1px)}
-.action-btn.danger:hover{border-color:rgba(239,68,68,.3);color:#f87171;background:rgba(239,68,68,.08)}
+.filter-pill{padding:7px 16px;border-radius:100px;border:1px solid var(--glass-border);background:var(--glass);color:var(--text2);font-family:var(--font-b);font-size:.8rem;font-weight:500;cursor:pointer;transition:all .25s;user-select:none}
+.filter-pill:hover{border-color:rgba(185,255,102,.25);color:var(--text)}
+.filter-pill.active{background:rgba(185,255,102,.12);border-color:rgba(185,255,102,.3);color:var(--accent)}
+.filter-pill .ct{margin-left:4px;font-size:.7rem;opacity:.6}
+.filter-sep{width:1px;height:24px;background:var(--glass-border)}
+.act-btn{padding:7px 14px;border-radius:var(--radius-xs);border:1px solid var(--glass-border);background:var(--glass);color:var(--text2);font-family:var(--font-b);font-size:.78rem;cursor:pointer;transition:all .2s}
+.act-btn:hover{background:rgba(255,255,255,.05);color:var(--text)}
+.act-btn.danger:hover{border-color:rgba(239,68,68,.3);color:#f87171}
 
-/* ── Contact Grid ── */
 .contact-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:16px}
-.contact-card{background:var(--glass);border:1px solid var(--glass-border);border-radius:var(--radius);padding:0;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);position:relative;overflow:hidden;transition:transform .4s cubic-bezier(.16,1,.3,1),border-color .4s ease,box-shadow .4s ease;opacity:0;transform:translateY(24px)}
+.contact-card{background:var(--glass);border:1px solid var(--glass-border);border-radius:var(--radius);backdrop-filter:blur(20px);position:relative;overflow:hidden;transition:transform .4s cubic-bezier(.16,1,.3,1),border-color .3s,box-shadow .4s;opacity:0;transform:translateY(20px)}
 .contact-card.visible{opacity:1;transform:translateY(0)}
-.contact-card:hover{transform:translateY(-4px);border-color:rgba(124,92,252,.2);box-shadow:0 8px 40px rgba(0,0,0,.3),0 0 30px rgba(124,92,252,.06)}
-.contact-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--grad);opacity:0;transition:opacity .4s ease}
+.contact-card:hover{transform:translateY(-4px);border-color:rgba(185,255,102,.2);box-shadow:0 8px 40px rgba(0,0,0,.3),0 0 20px rgba(185,255,102,.04)}
+.contact-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--grad);opacity:0;transition:opacity .3s}
 .contact-card:hover::before{opacity:1}
-.card-header{padding:20px 20px 0;display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
-.card-avatar{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-family:var(--font-h);font-weight:700;font-size:1rem;flex-shrink:0;background:linear-gradient(135deg,rgba(124,92,252,.2),rgba(56,189,248,.2));border:1px solid rgba(255,255,255,.06)}
-.card-avatar.initials{font-size:.85rem;letter-spacing:.02em}
+.card-head{padding:18px 18px 0;display:flex;align-items:flex-start;gap:12px}
+.card-av{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:var(--font-h);font-weight:700;font-size:.85rem;background:linear-gradient(135deg,rgba(185,255,102,.15),rgba(57,255,20,.15));border:1px solid rgba(255,255,255,.05);flex-shrink:0}
 .card-info{flex:1;min-width:0}
-.card-company{font-family:var(--font-h);font-weight:600;font-size:.95rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.card-meta{font-size:.78rem;color:var(--text2);margin-top:2px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
-.card-meta .tag{display:inline-flex;padding:2px 8px;border-radius:100px;background:rgba(124,92,252,.08);color:var(--accent);font-size:.7rem;font-weight:500;white-space:nowrap}
-.card-body{padding:12px 20px 0}
-.card-contact-row{display:flex;align-items:center;gap:8px;font-size:.82rem;color:var(--text2);padding:4px 0}
-.card-contact-row .icon{width:16px;text-align:center;flex-shrink:0;font-size:.75rem}
-.card-contact-row a{color:var(--text2);transition:color .2s}
-.card-contact-row a:hover{color:var(--accent)}
-
-/* Status & Actions Row */
-.card-actions{padding:12px 20px 20px;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
-.status-btn{display:flex;align-items:center;gap:5px;padding:6px 12px;border-radius:100px;border:1px solid var(--glass-border);background:var(--glass);color:var(--text2);font-size:.75rem;font-weight:500;cursor:pointer;transition:all .3s ease;white-space:nowrap}
+.card-company{font-family:var(--font-h);font-weight:600;font-size:.92rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card-meta{font-size:.75rem;color:var(--text2);margin-top:2px;display:flex;gap:6px;flex-wrap:wrap}
+.card-meta .tag{padding:2px 8px;border-radius:100px;background:rgba(185,255,102,.06);color:var(--accent);font-size:.68rem;font-weight:500}
+.card-body{padding:10px 18px 0}
+.card-row{display:flex;align-items:center;gap:6px;font-size:.8rem;color:var(--text2);padding:3px 0}
+.card-row .ic{width:16px;text-align:center;font-size:.72rem;flex-shrink:0}
+.card-row a{color:var(--text2);transition:color .2s}.card-row a:hover{color:var(--accent)}
+.card-actions{padding:10px 18px 18px;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.status-btn{display:flex;align-items:center;gap:5px;padding:5px 12px;border-radius:100px;border:1px solid var(--glass-border);background:var(--glass);color:var(--text2);font-size:.72rem;font-weight:500;cursor:pointer;transition:all .25s}
 .status-btn:hover{border-color:rgba(255,255,255,.15);color:var(--text)}
-.status-btn.s-ceka{border-color:rgba(251,191,36,.2);color:#fbbf24;background:rgba(251,191,36,.06)}
-.status-btn.s-utoku{border-color:rgba(56,189,248,.2);color:#38bdf8;background:rgba(56,189,248,.06)}
-.status-btn.s-zavrseno{border-color:rgba(52,211,153,.2);color:#34d399;background:rgba(52,211,153,.06)}
-.status-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
-.status-dot.pulse{animation:statusPulse 2s ease-in-out infinite}
-@keyframes statusPulse{0%,100%{opacity:.5;box-shadow:0 0 0 0 currentColor}50%{opacity:1;box-shadow:0 0 0 4px transparent}}
-.s-ceka .status-dot{background:#fbbf24;color:#fbbf24}
-.s-utoku .status-dot{background:#38bdf8;color:#38bdf8}
-.s-zavrseno .status-dot{background:#34d399;color:#34d399}
-.card-right{display:flex;align-items:center;gap:6px}
-.btn-icon{width:32px;height:32px;border-radius:8px;border:1px solid var(--glass-border);background:transparent;color:var(--text3);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.85rem;transition:all .25s ease}
-.btn-icon:hover{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.15);color:var(--text)}
-.btn-icon.called{color:#fbbf24;border-color:rgba(251,191,36,.25);background:rgba(251,191,36,.06)}
-.btn-icon.expand-active{color:var(--accent);border-color:rgba(124,92,252,.25);background:rgba(124,92,252,.06)}
-
-/* Status Dropdown */
-.status-dropdown{position:absolute;bottom:100%;right:20px;margin-bottom:4px;background:rgba(15,15,25,.95);border:1px solid var(--glass-border);border-radius:var(--radius-sm);padding:6px;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);box-shadow:0 8px 32px rgba(0,0,0,.5);z-index:50;display:none;min-width:140px}
-.status-dropdown.show{display:block;animation:dropIn .2s ease}
-@keyframes dropIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
-.status-option{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:var(--radius-xs);font-size:.8rem;color:var(--text2);cursor:pointer;transition:all .2s ease;border:none;background:none;width:100%;text-align:left;font-family:var(--font-b)}
-.status-option:hover{background:rgba(255,255,255,.06);color:var(--text)}
-
-/* Notes */
-.card-notes{max-height:0;overflow:hidden;transition:max-height .4s cubic-bezier(.16,1,.3,1),padding .3s ease;padding:0 20px}
-.card-notes.open{max-height:200px;padding:0 20px 16px}
-.card-notes textarea{width:100%;height:70px;padding:10px 12px;border-radius:var(--radius-sm);border:1px solid var(--glass-border);background:rgba(255,255,255,.02);color:var(--text);font-family:var(--font-b);font-size:.8rem;resize:none;outline:none;transition:border-color .3s}
-.card-notes textarea:focus{border-color:rgba(124,92,252,.3)}
+.status-btn.s-pending{border-color:rgba(251,191,36,.2);color:#fbbf24;background:rgba(251,191,36,.05)}
+.status-btn.s-progress{border-color:rgba(56,189,248,.2);color:#38bdf8;background:rgba(56,189,248,.05)}
+.status-btn.s-done{border-color:rgba(52,211,153,.2);color:#34d399;background:rgba(52,211,153,.05)}
+.status-dot{width:6px;height:6px;border-radius:50%;animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:.5}50%{opacity:1}}
+.s-pending .status-dot{background:#fbbf24}.s-progress .status-dot{background:#38bdf8}.s-done .status-dot{background:#34d399}
+.card-right{display:flex;gap:5px}
+.btn-ic{width:30px;height:30px;border-radius:7px;border:1px solid var(--glass-border);background:transparent;color:var(--text3);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.8rem;transition:all .2s}
+.btn-ic:hover{background:rgba(255,255,255,.05);color:var(--text)}
+.btn-ic.called{color:#fbbf24;border-color:rgba(251,191,36,.2)}
+.btn-ic.exp-active{color:var(--accent);border-color:rgba(185,255,102,.2)}
+.card-notes{max-height:0;overflow:hidden;transition:max-height .35s cubic-bezier(.16,1,.3,1);padding:0 18px}
+.card-notes.open{max-height:160px;padding:0 18px 14px}
+.card-notes textarea{width:100%;height:60px;padding:8px 10px;border-radius:8px;border:1px solid var(--glass-border);background:rgba(255,255,255,.02);color:var(--text);font-family:var(--font-b);font-size:.78rem;resize:none;outline:none;transition:border-color .3s}
+.card-notes textarea:focus{border-color:rgba(185,255,102,.3)}
 .card-notes textarea::placeholder{color:var(--text3)}
 
-/* ── Toast ── */
-.toast-container{position:fixed;bottom:24px;right:24px;z-index:10000;display:flex;flex-direction:column;gap:8px}
-.toast{padding:12px 20px;border-radius:var(--radius-sm);background:rgba(15,15,25,.92);border:1px solid var(--glass-border);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);color:var(--text);font-size:.85rem;font-weight:500;transform:translateX(120%);animation:toastIn .4s cubic-bezier(.16,1,.3,1) forwards;box-shadow:0 8px 32px rgba(0,0,0,.4);display:flex;align-items:center;gap:8px;max-width:340px}
-.toast.out{animation:toastOut .3s ease forwards}
-@keyframes toastIn{to{transform:translateX(0)}}
-@keyframes toastOut{to{transform:translateX(120%);opacity:0}}
+.toast-box{position:fixed;bottom:20px;right:20px;z-index:10000;display:flex;flex-direction:column;gap:8px}
+.toast{padding:10px 18px;border-radius:var(--radius-sm);background:rgba(15,15,25,.92);border:1px solid var(--glass-border);backdrop-filter:blur(20px);color:var(--text);font-size:.82rem;font-weight:500;transform:translateX(120%);animation:tIn .4s cubic-bezier(.16,1,.3,1) forwards;display:flex;align-items:center;gap:8px}
+.toast.out{animation:tOut .3s forwards}
+@keyframes tIn{to{transform:translateX(0)}}@keyframes tOut{to{transform:translateX(120%);opacity:0}}
 
-/* ── Empty State ── */
-.empty-state{text-align:center;padding:80px 24px;color:var(--text3)}
-.empty-state .icon{font-size:3rem;margin-bottom:16px;opacity:.5}
-.empty-state p{font-size:1rem}
+.empty{text-align:center;padding:60px 24px;color:var(--text3)}
+.footer{text-align:center;padding:40px 24px;color:var(--text3);font-size:.78rem;border-top:1px solid var(--glass-border);margin-top:32px}
+.footer span{background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:600}
+@media(max-width:1024px){.bento{grid-template-columns:repeat(2,1fr)}.bento-card.span-2{grid-column:span 2}}
+@media(max-width:640px){.bento{grid-template-columns:1fr}.bento-card.span-2{grid-column:span 1}.contact-grid{grid-template-columns:1fr}.hero{min-height:45vh;padding:50px 16px 30px}.filter-pill{padding:5px 10px;font-size:.72rem}}
 
-/* ── Footer ── */
-.footer{text-align:center;padding:60px 24px;color:var(--text3);font-size:.8rem;border-top:1px solid var(--glass-border);margin-top:40px;position:relative;z-index:1}
-.footer span{background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-weight:600}
-
-/* ── Responsive ── */
-@media(max-width:1024px){
-  .bento{grid-template-columns:repeat(2,1fr)}
-  .bento-card.span-2{grid-column:span 2}
-}
-@media(max-width:640px){
-  .bento{grid-template-columns:1fr}
-  .bento-card.span-2{grid-column:span 1}
-  .contact-grid{grid-template-columns:1fr}
-  .hero{min-height:50vh;padding:60px 16px 40px}
-  .filter-bar{gap:6px}
-  .filter-pill{padding:6px 12px;font-size:.75rem}
-}
 </style>
 </head>
 <body>
-
-<!-- Cursor Glow -->
+<canvas id="three-canvas"></canvas>
 <div id="cursorGlow"></div>
-
-<!-- Floating Orbs -->
 <div class="orb orb-1"></div>
 <div class="orb orb-2"></div>
 <div class="orb orb-3"></div>
 
-<!-- Loading Screen -->
-<div id="loader">
-  <div class="loader-logo">
-    <svg viewBox="0 0 100 100" fill="none">
-      <defs>
-        <linearGradient id="lGrad" x1="0" y1="0" x2="100" y2="100" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stop-color="#7c5cfc"/>
-          <stop offset="100%" stop-color="#38bdf8"/>
-        </linearGradient>
-      </defs>
-      <circle class="loader-ring" cx="50" cy="50" r="42" stroke="url(#lGrad)" stroke-width="3" stroke-dasharray="280" stroke-linecap="round" fill="none"/>
-      <text x="50" y="55" text-anchor="middle" fill="url(#lGrad)" font-family="Space Grotesk,sans-serif" font-size="22" font-weight="700">LF</text>
-    </svg>
+<div id="loader"><div class="loader-ring"></div><div class="loader-text">LeadFlow BiH</div></div>
+
+<div class="settings-panel">
+  <button class="settings-btn" onclick="toggleSettings()" title="Postavke">⚙️</button>
+  <div class="settings-dropdown" id="settingsDrop">
+    <div class="setting-group">
+      <div class="setting-label">Tema</div>
+      <div class="mode-toggle">
+        <button class="mode-btn active" onclick="setMode('dark',this)">🌙 Dark</button>
+        <button class="mode-btn" onclick="setMode('light',this)">☀️ Light</button>
+      </div>
+    </div>
+    <div class="setting-group">
+      <div class="setting-label">Boja akcenta</div>
+      <div class="color-row">
+        <div class="color-dot active" style="background:#b9ff66" onclick="setAccent('#b9ff66','#39ff14','#00ff88',this)" title="Fluoro Zeleno"></div>
+        <div class="color-dot" style="background:#ff3e6c" onclick="setAccent('#ff3e6c','#ff6b8a','#ff1744',this)" title="Fluoro Crveno"></div>
+        <div class="color-dot" style="background:#ffea00" onclick="setAccent('#ffea00','#ffd600','#ffab00',this)" title="Fluoro Žuto"></div>
+        <div class="color-dot" style="background:#00e5ff" onclick="setAccent('#00e5ff','#18ffff','#00b0ff',this)" title="Fluoro Plavo"></div>
+        <div class="color-dot" style="background:#e040fb" onclick="setAccent('#e040fb','#ea80fc','#d500f9',this)" title="Fluoro Ljubičasto"></div>
+        <div class="color-dot" style="background:#ff9100" onclick="setAccent('#ff9100','#ffab40','#ff6d00',this)" title="Fluoro Narančasto"></div>
+      </div>
+    </div>
   </div>
-  <div class="loader-text">LeadFlow BiH</div>
 </div>
 
-<!-- Hero Section -->
 <section class="hero">
   <div class="hero-mesh"></div>
   <div class="hero-content">
@@ -241,204 +207,257 @@ section{margin-bottom:64px}
       <span class="line"><span>Upravljaj svojim</span></span>
       <span class="line"><span><span class="gradient">leadovima</span> efikasno</span></span>
     </h1>
-    <p>Praćenje 73 kontakt diljem Bosne i Hercegovine. Od frizerskih salona do advokatskih kancelarija — sve na jednom mjestu.</p>
+    <p>Praćenje 73 kontakata diljem Bosne i Hercegovine. Od frizerskih salona do advokatskih kancelarija — sve na jednom mjestu.</p>
   </div>
 </section>
 
-<!-- Main Content -->
 <div class="container">
-
-  <!-- Bento Stats -->
-  <section id="statsSection">
+  <section>
     <div class="section-label">Pregled</div>
-    <div class="bento" id="bentoGrid">
-      <!-- Populated by JS -->
-    </div>
+    <div class="bento" id="bentoGrid"></div>
   </section>
 
-  <!-- SVG Defs for Progress Ring -->
   <svg width="0" height="0" style="position:absolute">
-    <defs>
-      <linearGradient id="progressGrad" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0%" stop-color="#7c5cfc"/>
-        <stop offset="100%" stop-color="#38bdf8"/>
-      </linearGradient>
-    </defs>
+    <defs><linearGradient id="pGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#b9ff66"/><stop offset="100%" stop-color="#39ff14"/></linearGradient></defs>
   </svg>
 
-  <!-- Search & Filters -->
-  <section id="controlsSection">
-    <div class="section-label">Pretraga & filteri</div>
-    <div class="controls" id="controlsWrap">
+  <section>
+    <div class="section-label">Pretraga &amp; filteri</div>
+    <div class="controls">
       <div class="search-wrap">
-        <span class="search-icon">⌕</span>
+        <span class="search-icon">🔍</span>
         <input type="text" id="searchInput" placeholder="Pretraga po firmi, gradu, kategoriji…" autocomplete="off">
       </div>
       <div class="filter-bar" id="filterBar">
-        <button class="filter-pill active" data-filter="all">Svi <span class="count" id="countAll"></span></button>
-        <button class="filter-pill" data-filter="ceka">↩️ Čeka <span class="count" id="countCeka"></span></button>
-        <button class="filter-pill" data-filter="utoku">⏳ U toku <span class="count" id="countUtoku"></span></button>
-        <button class="filter-pill" data-filter="zavrseno">✅ Završeno <span class="count" id="countZavrseno"></span></button>
-        <button class="filter-pill" data-filter="called">📞 Zvali <span class="count" id="countCalled"></span></button>
+        <button class="filter-pill active" data-filter="all">Svi <span class="ct" id="cAll"></span></button>
+        <button class="filter-pill" data-filter="pending">⏳ Čeka <span class="ct" id="cPen"></span></button>
+        <button class="filter-pill" data-filter="progress">🔄 U toku <span class="ct" id="cPro"></span></button>
+        <button class="filter-pill" data-filter="done">✅ Završeno <span class="ct" id="cDon"></span></button>
+        <button class="filter-pill" data-filter="called">📞 Zvali <span class="ct" id="cCal"></span></button>
         <div class="filter-sep"></div>
-        <button class="action-btn" onclick="exportCSV()">⬇ CSV</button>
-        <button class="action-btn" onclick="exportJSON()">⬇ JSON</button>
-        <button class="action-btn danger" onclick="resetAll()">↺ Reset</button>
+        <button class="act-btn" onclick="expCSV()">⬇ CSV</button>
+        <button class="act-btn" onclick="expJSON()">⬇ JSON</button>
+        <button class="act-btn danger" onclick="resetAll()">↺ Reset</button>
       </div>
     </div>
   </section>
 
-  <!-- Contact Cards -->
-  <section id="contactsSection">
+  <section>
     <div class="section-label">Kontakti <span id="contactCount" style="margin-left:8px;font-weight:400;color:var(--text3)"></span></div>
-    <div class="contact-grid" id="contactGrid">
-      <!-- Populated by JS -->
-    </div>
-    <div class="empty-state" id="emptyState" style="display:none">
-      <div class="icon">🔍</div>
-      <p>Nema rezultata za traženi pojam.</p>
-    </div>
+    <div class="contact-grid" id="contactGrid"></div>
+    <div class="empty" id="emptyState" style="display:none"><p>🔍 Nema rezultata</p></div>
   </section>
 </div>
 
-<!-- Toast Container -->
-<div class="toast-container" id="toastContainer"></div>
+<div class="toast-box" id="toastBox"></div>
+<div class="footer"><p>Built with <span>LeadFlow</span> · 73 kontakata · Bosna i Hercegovina</p></div>
 
-<!-- Footer -->
-<div class="footer">
-  <p>Built with <span>LeadFlow</span> · 73 kontakta · Bosna i Hercegovina</p>
-</div>
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
-const DB='lead_manager_biH';
-let filter='all';
+var DB='lead_manager_biH',filter='all';
+
+var L=[
+["Almir","Alibegović","Frizerski salon A.A. Alibegović","Sarajevo","frizerski salon","+387 33 537 539","","Nema web"],
+["Amela","Husić","Frizerski salon Amela s.z.r.","Sarajevo","frizerski salon","+387 62 583 854","","Baščaršija"],
+["","","Beauty Salon Na-Na","Sarajevo","kozmetički salon","+387 61 666 002","info@na-na.ba","Stupska 19-B2"],
+["","","Beauty First Salon & Spa d.o.o.","Sarajevo","kozmetički salon","+387 33 977 913","","Ilidža"],
+["","","Ženski frizerski salon KIM","Sarajevo","frizerski salon","+387 33 667 513","","Avde Hume 21"],
+["Sead","Rizvić","Restoran Sarajevo Vl Rizvić","Sarajevo","restoran","+387 61 053 678","","Restoran"],
+["Semih","Aslan","Restoran Sofra d.o.o.","Sarajevo","restoran","+387 33 447 815","","Baščaršija 31"],
+["","","Auto Servis Team","Sarajevo","auto servis","+387 61 552 168","","Samo Facebook"],
+["","","Autoelektra","Sarajevo","auto servis","+387 33 444 749","aesa@bih.net.ba","Patriotske lige 10"],
+["","","Automotive Center","Sarajevo","auto servis","+387 33 715 465","","Vilsonovo šetalište 10"],
+["","","Auto Servis DEL","Sarajevo","auto servis","+387 62 1","","Urijan Dedina 48"],
+["","","Dodir Kozmetički salon","Sarajevo","kozmetički salon","+387 33 204 756","info@dodir.ba","Grbavička 5"],
+["","","Salon Estetika","Sarajevo","kozmetički salon","+387 61 030 504","","Kemala Kapetanovića 13"],
+["","","Nova Beauty d.o.o.","Sarajevo","kozmetički salon","+387 62 725 741","","Direktor: Fazlić Alma"],
+["","","Pekara AS d.o.o.","Sarajevo","pekara","+387 33 610 286","","Direktor: Gjuraj"],
+["","","Pekara EDI d.o.o.","Sarajevo","pekara","+387 62 412 405","","Ilidža"],
+["","","SAPLAST d.o.o.","Sarajevo","stolarija","+387 33 779 500","info@saplast.ba","Nikole Šopa 245"],
+["","","ELOX d.o.o.","Sarajevo","stolarija","+387 61 984 333","info@elox.ba","Put Famosa 38"],
+["","","BH Werk d.o.o.","Sarajevo","stolarija","+387 62 853 773","info@bhwerk.com","Vogošćanskih odreda 44D"],
+["","","DOM-A d.o.o.","Sarajevo","stolarija","+387 61 264 233","info@dom-a.ba","PVC i ALU stolarija"],
+["Miroslav","Tomić","Lokal Caffe Miroslav Tomić s.p.","Banja Luka","caffe bar","+387 65 385 026","tomicmiroslav00@gmail.com",""],
+["","","Caffe Bar ARIA","Banja Luka","caffe bar","","","Bana Milosavljevića 1"],
+["","","Restoran Kastel","Banja Luka","restoran","","",""],
+["","","Pekara Mlinar","Banja Luka","pekara","","","Lanac pekara"],
+["","","Fitness centar Fit Zone","Banja Luka","fitness studio","","",""],
+["","","Tehnomag","Banja Luka","trgovina","+387 51 200 000","banjaluka@tehnomag.com","Lanac trgovina"],
+["","","Motorex P.J. Bihać 1","Bihać","auto dijelovi","+387 37 351 833","","37 retail objekata"],
+["","","Cvjećara Vernisaž","Bihać","cvjećara","+387 62 595 946","cvjecara.vernisaz@gmail.com",""],
+["","","Cvjećara S-Garden","Bihać","cvjećara","+387 63 597 585","cvjecarasgarden@gmail.com","TC Bingo"],
+["Snježana","Rajković","Cvjećara Iris Bihać","Bihać","cvjećara","+387 66 955 874","",""],
+["","","DELFIN Autopraona","Bihać","autopraonica","+387 61 591 903","",""],
+["","","Auto Lider d.o.o.","Brčko","auto","+387 61 600 008","","Mostarska bb"],
+["Adis","Selimović","Autolimar ADO","Brčko","autolimar","+387 62 180 655","","Alije Selimovića"],
+["","","Autolimar i Lakirer Šiša","Brčko","autolimar","+387 61 425 314","","Samo Facebook"],
+["","","Vulkanizer Brzi Servis Marić","Grude","vulkanizer","+387 63 326 099","","Imotski-Grude"],
+["","","COKUL COMMERCE d.o.o.","Grude","vulkanizer","+387 39 661 601","",""],
+["","","Foto Studio Franjić","Novi Travnik","photo studio","+387 30 791 536","foto.franjic@gmail.com",""],
+["","","Studio Level","Novi Travnik","photo studio","+387 63 595 500","info@studio-level.com","72290"],
+["","","Foto-Video Studio Home","Novi Travnik","photo studio","+387 62 33","",""],
+["","","Caffe Studio","Novi Travnik","caffe bar","+387 30 790 600","margetonij@gmail.com","Samo Facebook"],
+["","","Pulmont d.o.o.","Zenica","građevinska","+387 32 402 045","","Sabahudin Đuherić"],
+["","","EN-BE Građevinski obrt","Zenica","građevinska","+387 61 451 939","crjasko@gmail.com","Gorica 46"],
+["","","Techno Shop Zenica","Zenica","trgovina","+387 32 249 111","zenica@technoshop.ba","Kamberovića čikma"],
+["","","Tehnomag Zenica","Zenica","trgovina","+387 32 445 740","zenica@tehnomag.com","Lanac trgovina"],
+["","","ES OPTIC Visoko","Visoko","optika","+387 62 148 462","esopticvisoko@gmail.com","Musala 1"],
+["","","Optika Tihić","Visoko","optika","+387 61 925 925","","Kralja Tvrtka bb"],
+["","","Optika Beganović","Visoko","optika","+387 62 750 800","","Čaršijska"],
+["","","BB NEW LOOK d.o.o.","Mostar","trgovina odjećom","+387 36 317 299","","Boro Bandić"],
+["","","ANGEL'S FASHION d.o.o.","Mostar","trgovina odjećom","+387 36 322 360","","Ivana Džidić"],
+["","","Moda Best d.o.o.","Mostar","trgovina odjećom","+387 36 836 257","","Ivan Grgić"],
+["","","FREE SHOP d.o.o.","Mostar","trgovina odjećom","+387 36 550 385","","Damir Beljo"],
+["","","Elko Marić d.o.o.","Mostar","električar","+387 36 558 080","elkomaric@bih.net.ba","Maršala Tita 294"],
+["","","Elektro Mont Mostar","Mostar","električar","+387 36 334 334","elektro-mont@tel.net.ba","Put za Aluminij"],
+["","","Intertekstil","Široki Brijeg","trgovina odjećom","+387 39 705 451","","Gojka Šuška 2A"],
+["","","Boutique Markos","Široki Brijeg","trgovina odjećom","+387 39 705 743","dpenava85@gmail.com",""],
+["","","SARTEKS d.o.o.","Široki Brijeg","trgovina","+387 39 701 838","sarteks1@tel.net.ba","Uzarići bb"],
+["","","EUROM d.o.o.","Široki Brijeg","trgovina","+387 39 705 411","euromsb1@gmail.com","Igračke i kućanske"],
+["","","Dječiji vrtić Ljubuški","Ljubuški","vrtić","+387 39 833 261","d.vrtic.ljubuski@gmail.com",""],
+["","","Restoran Labirint","Mostar","restoran","","",""],
+["","","La-Tour Agencija","Čapljina","putnička agencija","+387 63 320 325","info@la-touragency.com","Višići"],
+["","","Čapljinka Turistička org.","Čapljina","putnička agencija","+387 36 806 147","tur.org.capljina@tel.net.ba","Mate Bobana bb"],
+["","","Hotel Turist '98","Jajce","hotel","+387 30 658 151","utd.turist98@tel.net.ba","Kulina bana 1"],
+["","","Hotel Plivsko Jezero","Jajce","hotel","+387 30 654 090","reception@plivskojezero.com","Jajce"],
+["Boban","Savić","Advokatska kancelarija Savić","Doboj","advokat","+387 66 490 494","bobansavic84@gmail.com","Svetog Save 24"],
+["Irena","Puzić-Obradović","Adv. kancelarija Puzić-Obradović","Doboj","advokat","+387 53 222 030","irenapuzic@yahoo.com",""],
+["","","Finel Računovodstvo i Revizija","Tuzla","računovodstvo","+387 35 262 370","info@finel.ba","Stupine B9"],
+["","","Revis Računovodstvo","Tuzla","računovodstvo","+387 35 270 094","revis@revis.ba","Kazan mahala 36"],
+["","","ESGfin Tuzla","Tuzla","računovodstvo","+387 61 480 834","info@esgfin.ba",""],
+["","","Atria d.o.o.","Tuzla","računovodstvo","+387 61 732 398","info@atria.ba","Titanik zgrada"],
+["","","Fitness Studio Fuke","Tuzla","fitness","+387 61 179 000","","Mije Keroševića 20"],
+["","","Fitness Studio Dobar Osjećaj","Tuzla","fitness","+387 61 271 655","","Armije BiH 15"],
+["","","Fitness & Aerobic Studio LIFE","Tuzla","fitness","+387 61 855 843","",""],
+["","","Feel Good Fitness Studio","Tuzla","fitness","","feelgoodfitness875@gmail.com","Samo Facebook"]
+];
 
 function ls(){try{return JSON.parse(localStorage.getItem(DB))||{}}catch(e){return{}}}
 function ss(s){localStorage.setItem(DB,JSON.stringify(s))}
-
-function gc(){return L.map((l,i)=>{
-  const id='c'+i,st=(ls()[id]||{});
-  return{id,owner:[l[0],l[1]].filter(Boolean).join(' '),company:l[2],city:l[3],category:l[4],phone:l[5],email:l[6],notes:l[7]||'',status:st.status||'pending',called:st.called||false,custNotes:st.notes||''};
-});}
-
-function uc(id,f,v){const st=ls();if(!st[id])st[id]={status:'pending',called:false,notes:''};st[id][f]=v;ss(st);}
-
-function toast(msg){const c=document.getElementById('toastContainer');const t=document.createElement('div');t.className='toast';t.innerHTML=msg;c.appendChild(t);setTimeout(()=>{t.classList.add('out');setTimeout(()=>t.remove(),300)},2500);}
+function gc(){return L.map(function(l,i){var id='c'+i,st=ls()[id]||{};return{id:id,owner:[l[0],l[1]].filter(Boolean).join(' '),company:l[2],city:l[3],category:l[4],phone:l[5],email:l[6],notes:l[7]||'',status:st.status||'pending',called:st.called||false,custNotes:st.notes||''}})}
+function uc(id,f,v){var st=ls();if(!st[id])st[id]={status:'pending',called:false,notes:''};st[id][f]=v;ss(st)}
+function toast(msg){var c=document.getElementById('toastBox'),t=document.createElement('div');t.className='toast';t.innerHTML=msg;c.appendChild(t);setTimeout(function(){t.classList.add('out');setTimeout(function(){t.remove()},300)},2500)}
 
 function initBento(){
-  const all=gc(),done=all.filter(c=>c.status==='done').length,prog=all.filter(c=>c.status==='in_progress').length;
-  const pend=all.length-done-prog,pct=all.length?Math.round(done/all.length*100):0;
-  const ringOffset=314-(314*pct/100);
+  var all=gc(),done=0,prog=0,pend=0,called=0;
+  all.forEach(function(c){if(c.status==='done')done++;else if(c.status==='in_progress')prog++;if(c.called)called++});
+  pend=all.length-done-prog;
+  var pct=all.length?Math.round(done/all.length*100):0;
+  var off=314-(314*pct/100);
   document.getElementById('bentoGrid').innerHTML=
-    '<div class="bento-card span-2" style="transition-delay:0s">'+
-      '<div style="display:flex;align-items:center;gap:20px">'+
-        '<div class="progress-ring">'+
-          '<svg viewBox="0 0 120 120"><circle class="bg" cx="60" cy="60" r="50"/><circle class="fg" cx="60" cy="60" r="50" style="stroke-dashoffset:'+ringOffset+'"/></svg>'+
-          '<div class="center-text">'+pct+'%</div>'+
-        '</div>'+
-        '<div><div class="bento-value">'+done+'<span style="font-size:1rem;color:var(--text3)">/'+all.length+'</span></div><div class="bento-label">Kontakata završeno</div></div>'+
-      '</div>'+
-    '</div>'+
-    '<div class="bento-card" style="transition-delay:.1s"><div class="bento-icon" style="background:rgba(251,191,36,.1);color:#fbbf24">⏳</div><div class="bento-value" style="color:#fbbf24">'+pend+'</div><div class="bento-label">Čeka na poziv</div></div>'+
-    '<div class="bento-card" style="transition-delay:.15s"><div class="bento-icon" style="background:rgba(56,189,248,.1);color:#38bdf8">🔄</div><div class="bento-value" style="color:#38bdf8">'+prog+'</div><div class="bento-label">U toku</div></div>'+
-    '<div class="bento-card" style="transition-delay:.2s"><div class="bento-icon" style="background:rgba(52,211,153,.1);color:#34d399">✅</div><div class="bento-value" style="color:#34d399">'+done+'</div><div class="bento-label">Završeno</div></div>'+
-    '<div class="bento-card" style="transition-delay:.25s"><div class="bento-icon" style="background:rgba(244,114,182,.1);color:#f472b6">📞</div><div class="bento-value" style="color:#f472b6">'+all.filter(c=>c.called).length+'</div><div class="bento-label">Pozvano</div></div>';
+    '<div class="bento-card span-2"><div style="display:flex;align-items:center;gap:20px"><div class="progress-ring"><svg viewBox="0 0 120 120"><circle class="bg" cx="60" cy="60" r="50"/><circle class="fg" cx="60" cy="60" r="50" style="stroke-dashoffset:'+off+'"/></svg><div class="progress-center">'+pct+'%</div></div><div><div class="bento-value">'+done+'<span style="font-size:1rem;color:var(--text3)">/'+all.length+'</span></div><div class="bento-label">Kontakata završeno</div></div></div></div>'+
+    '<div class="bento-card"><div class="bento-icon" style="background:rgba(251,191,36,.1);color:#fbbf24">⏳</div><div class="bento-value" style="color:#fbbf24">'+pend+'</div><div class="bento-label">Čeka na poziv</div></div>'+
+    '<div class="bento-card"><div class="bento-icon" style="background:rgba(56,189,248,.1);color:#38bdf8">🔄</div><div class="bento-value" style="color:#38bdf8">'+prog+'</div><div class="bento-label">U toku</div></div>'+
+    '<div class="bento-card"><div class="bento-icon" style="background:rgba(52,211,153,.1);color:#34d399">✅</div><div class="bento-value" style="color:#34d399">'+done+'</div><div class="bento-label">Završeno</div></div>'+
+    '<div class="bento-card"><div class="bento-icon" style="background:rgba(244,114,182,.1);color:#f472b6">📞</div><div class="bento-value" style="color:#f472b6">'+called+'</div><div class="bento-label">Pozvano</div></div>';
   setTimeout(function(){document.querySelectorAll('.bento-card').forEach(function(c,i){setTimeout(function(){c.classList.add('visible')},i*80)})},100);
 }
 
 function updateCounts(){
-  var all=gc();
-  document.getElementById('countAll').textContent=all.length;
-  document.getElementById('countCeka').textContent=all.filter(function(c){return c.status==='pending'}).length;
-  document.getElementById('countUtoku').textContent=all.filter(function(c){return c.status==='in_progress'}).length;
-  document.getElementById('countZavrseno').textContent=all.filter(function(c){return c.status==='done'}).length;
-  document.getElementById('countCalled').textContent=all.filter(function(c){return c.called}).length;
+  var all=gc(),cp=0,co=0,cd=0,cc=0;
+  all.forEach(function(c){if(c.status==='pending')cp++;else if(c.status==='in_progress')co++;else if(c.status==='done')cd++;if(c.called)cc++});
+  document.getElementById('cAll').textContent=all.length;
+  document.getElementById('cPen').textContent=cp;
+  document.getElementById('cPro').textContent=co;
+  document.getElementById('cDon').textContent=cd;
+  document.getElementById('cCal').textContent=cc;
 }
 
 function renderContacts(){
   var q=document.getElementById('searchInput').value.toLowerCase();
-  var d=gc();
-  if(filter==='called')d=d.filter(function(c){return c.called});
-  else if(filter!=='all')d=d.filter(function(c){return c.status===filter});
-  if(q)d=d.filter(function(c){return (c.company+c.city+c.category+c.owner+c.custNotes+c.notes).toLowerCase().indexOf(q)!==-1});
-
+  var all=gc(),d=[];
+  all.forEach(function(c){
+    var show=true;
+    if(filter==='called'){if(!c.called)show=false}
+    else if(filter!=='all'){if(c.status!==filter)show=false}
+    if(show&&(c.company+c.city+c.category+c.owner+c.custNotes+c.notes).toLowerCase().indexOf(q)===-1)show=false;
+    if(show)d.push(c);
+  });
   document.getElementById('contactCount').textContent='— '+d.length+' rezultata';
   var grid=document.getElementById('contactGrid');
-  var empty=document.getElementById('emptyState');
-
-  if(!d.length){grid.innerHTML='';empty.style.display='block';return;}
-  empty.style.display='none';
-
+  if(!d.length){grid.innerHTML='';document.getElementById('emptyState').style.display='block';return}
+  document.getElementById('emptyState').style.display='none';
   grid.innerHTML=d.map(function(c,i){
-    var initials=c.company.split(' ').slice(0,2).map(function(w){return w[0]||''}).join('').toUpperCase();
-    var sc=c.status==='done'?'s-zavrseno':c.status==='in_progress'?'s-utoku':'s-ceka';
+    var ini=c.company.split(' ').slice(0,2).map(function(w){return w[0]||''}).join('').toUpperCase();
+    var sc=c.status==='done'?'s-done':c.status==='in_progress'?'s-progress':'s-pending';
     var sl=c.status==='done'?'✅ Završeno':c.status==='in_progress'?'⏳ U toku':'↩️ Čeka';
     return '<div class="contact-card" style="transition-delay:'+Math.min(i*30,300)+'ms">'+
-      '<div class="card-header">'+
-        '<div class="card-avatar initials">'+initials+'</div>'+
-        '<div class="card-info">'+
-          '<div class="card-company">'+c.company+'</div>'+
-          '<div class="card-meta">'+
-            '<span class="tag">📍 '+c.city+'</span>'+
-            '<span class="tag">🏷 '+c.category+'</span>'+
-          '</div>'+
-        '</div>'+
-      '</div>'+
+      '<div class="card-head"><div class="card-av">'+ini+'</div><div class="card-info"><div class="card-company">'+c.company+'</div><div class="card-meta"><span class="tag">📍 '+c.city+'</span><span class="tag">🏷 '+c.category+'</span></div></div></div>'+
       '<div class="card-body">'+
-        (c.owner?'<div class="card-contact-row"><span class="icon">👤</span>'+c.owner+'</div>':'')+
-        (c.phone?'<div class="card-contact-row"><span class="icon">📞</span><a href="tel:'+c.phone.replace(/\s/g,'')+'">'+c.phone+'</a></div>':'')+
-        (c.email?'<div class="card-contact-row"><span class="icon">✉️</span><a href="mailto:'+c.email+'">'+c.email+'</a></div>':'')+
-        (c.notes?'<div class="card-contact-row"><span class="icon">ℹ️</span><span style="color:var(--text3)">'+c.notes+'</span></div>':'')+
+      (c.owner?'<div class="card-row"><span class="ic">👤</span>'+c.owner+'</div>':'')+
+      (c.phone?'<div class="card-row"><span class="ic">📞</span><a href="tel:'+c.phone.replace(/\s/g,'')+'">'+c.phone+'</a></div>':'')+
+      (c.email?'<div class="card-row"><span class="ic">✉️</span><a href="mailto:'+c.email+'">'+c.email+'</a></div>':'')+
+      (c.notes?'<div class="card-row"><span class="ic">ℹ️</span><span style="color:var(--text3)">'+c.notes+'</span></div>':'')+
       '</div>'+
-      (c.custNotes?'<div style="padding:8px 20px 0"><div style="padding:8px 12px;background:rgba(124,92,252,.06);border-radius:8px;font-size:.8rem;color:var(--accent)">📝 '+c.custNotes+'</div></div>':'')+
-      '<div class="card-actions">'+
-        '<div class="card-right">'+
-          '<button class="status-btn '+sc+'" onclick="cycleStatus(\''+c.id+'\')" title="Promijeni status">'+
-            '<span class="status-dot pulse"></span>'+sl+
-          '</button>'+
-        '</div>'+
-        '<div class="card-right">'+
-          '<button class="btn-icon '+(c.called?'called':'')+'" onclick="tC(\''+c.id+'\')" title="Zvali">📞</button>'+
-          '<button class="btn-icon" onclick="toggleNotes(this)" title="Bilješke">📝</button>'+
-        '</div>'+
-      '</div>'+
+      (c.custNotes?'<div style="padding:8px 18px 0"><div style="padding:8px 12px;background:rgba(185,255,102,.06);border-radius:8px;font-size:.8rem;color:var(--accent)">📝 '+c.custNotes+'</div></div>':'')+
+      '<div class="card-actions"><div class="card-right"><button class="status-btn '+sc+'" onclick="cycleStatus(\''+c.id+'\')"><span class="status-dot"></span>'+sl+'</button></div><div class="card-right"><button class="btn-ic '+(c.called?'called':'')+'" onclick="tC(\''+c.id+'\')">📞</button><button class="btn-ic" onclick="toggleNotes(this)">📝</button></div></div>'+
       '<div class="card-notes"><textarea placeholder="Dodaj bilješku..." onblur="sN(\''+c.id+'\',this.value)">'+(c.custNotes||'')+'</textarea></div>'+
-    '</div>';
+      '</div>';
   }).join('');
-
   setTimeout(function(){document.querySelectorAll('.contact-card').forEach(function(c,i){setTimeout(function(){c.classList.add('visible')},i*30)})},50);
 }
 
-function cycleStatus(id){
-  var all=gc();var c=all.find(function(x){return x.id===id});if(!c)return;
-  var next={pending:'in_progress',in_progress:'done',done:'pending'};
-  var ns=next[c.status];uc(id,'status',ns);renderContacts();initBento();updateCounts();
-  toast(ns==='done'?'✅ Završeno':ns==='in_progress'?'⏳ U toku':'↩️ Čeka');
-}
-function tC(id){var st=ls();var v=!((st[id]||{}).called);uc(id,'called',v);renderContacts();initBento();updateCounts();toast(v?'📞 Označeno zvano':'↩️ Maknuto zvano');}
-function sN(id,n){uc(id,'notes',n);}
-function toggleNotes(btn){var notes=btn.closest('.contact-card').querySelector('.card-notes');notes.classList.toggle('open');btn.classList.toggle('expand-active');}
+function cycleStatus(id){var all=gc(),c=null;all.forEach(function(x){if(x.id===id)c=x});if(!c)return;var n={pending:'in_progress',in_progress:'done',done:'pending'};var ns=n[c.status];uc(id,'status',ns);renderContacts();initBento();updateCounts();toast(ns==='done'?'✅ Završeno':ns==='in_progress'?'⏳ U toku':'↩️ Čeka')}
+function tC(id){var v=!(ls()[id]&&ls()[id].called);uc(id,'called',v);renderContacts();initBento();updateCounts();toast(v?'📞 Označeno zvano':'↩️ Maknuto')}
+function sN(id,n){uc(id,'notes',n)}
+function toggleNotes(btn){var n=btn.closest('.contact-card').querySelector('.card-notes');n.classList.toggle('open');btn.classList.toggle('exp-active')}
 
-document.getElementById('filterBar').addEventListener('click',function(e){
-  var pill=e.target.closest('.filter-pill');if(!pill)return;
-  document.querySelectorAll('.filter-pill').forEach(function(p){p.classList.remove('active')});
-  pill.classList.add('active');filter=pill.dataset.filter;renderContacts();
-});
-
+document.getElementById('filterBar').addEventListener('click',function(e){var p=e.target.closest('.filter-pill');if(!p)return;document.querySelectorAll('.filter-pill').forEach(function(x){x.classList.remove('active')});p.classList.add('active');filter=p.dataset.filter;renderContacts()});
 document.getElementById('searchInput').addEventListener('input',function(){renderContacts()});
 
 var glow=document.getElementById('cursorGlow');
 document.addEventListener('mousemove',function(e){glow.style.left=e.clientX+'px';glow.style.top=e.clientY+'px'});
 
-function exportCSV(){var all=gc();var csv='Firma,Vlasnik,Grad,Kategorija,Telefon,Email,Bilješke,Status,Zvali\n';all.forEach(function(c){csv+='"'+c.company+'","'+c.owner+'","'+c.city+'","'+c.category+'","'+c.phone+'","'+c.email+'","'+(c.custNotes||c.notes)+'","'+c.status+'","'+(c.called?'Da':'Ne')+'"\n'});dl('leadovi-bih.csv',csv,'text/csv');}
-function exportJSON(){dl('leadovi-bih.json',JSON.stringify(gc(),null,2),'application/json');}
-function dl(n,c,t){var b=new Blob([c],{type:t}),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=n;a.click();URL.revokeObjectURL(u);toast('📥 Preuzeto: '+n);}
-function resetAll(){if(confirm('Resetovati sve statuse?')){localStorage.removeItem(DB);initBento();updateCounts();renderContacts();toast('🔄 Sve resetovano');}}
+/* Settings */
+function toggleSettings(){document.getElementById('settingsDrop').classList.toggle('show')}
+function setMode(m,btn){if(m==='light')document.body.classList.add('light');else document.body.classList.remove('light');document.querySelectorAll('.mode-btn').forEach(function(b){b.classList.remove('active')});btn.classList.add('active')}
+function setAccent(a1,a2,a3,el){var r=document.documentElement;r.style.setProperty('--accent',a1);r.style.setProperty('--accent2',a2);r.style.setProperty('--accent3',a3);r.style.setProperty('--grad','linear-gradient(135deg,'+a1+','+a2+')');
+  document.querySelectorAll('.color-dot').forEach(function(d){d.classList.remove('active')});el.classList.add('active');
+  /* Update Three.js particles */
+  if(window.particleMat)window.particleMat.color.set(a1);
+}
+
+function expCSV(){var all=gc(),csv='Firma,Vlasnik,Grad,Kategorija,Telefon,Email,Bilješke,Status,Zvali\n';all.forEach(function(c){csv+='"'+c.company+'","'+c.owner+'","'+c.city+'","'+c.category+'","'+c.phone+'","'+c.email+'","'+(c.custNotes||c.notes)+'","'+c.status+'","'+(c.called?'Da':'Ne')+'"\n'});dl('leadovi-bih.csv',csv,'text/csv')}
+function expJSON(){dl('leadovi-bih.json',JSON.stringify(gc(),null,2),'application/json')}
+function dl(n,c,t){var b=new Blob([c],{type:t}),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=n;a.click();URL.revokeObjectURL(u);toast('📥 '+n)}
+function resetAll(){if(confirm('Resetovati sve?')){localStorage.removeItem(DB);initBento();updateCounts();renderContacts();toast('🔄 Resetovano')}}
+
+/* Three.js Particles */
+function initThree(){
+  if(typeof THREE==='undefined')return;
+  var canvas=document.getElementById('three-canvas');
+  var renderer=new THREE.WebGLRenderer({canvas:canvas,alpha:true,antialias:true});
+  renderer.setSize(window.innerWidth,window.innerHeight);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+  var scene=new THREE.Scene();
+  var camera=new THREE.PerspectiveCamera(75,window.innerWidth/window.innerHeight,0.1,1000);
+  camera.position.z=30;
+  var count=500;
+  var geo=new THREE.BufferGeometry();
+  var pos=new Float32Array(count*3);
+  for(var i=0;i<count*3;i++){pos[i]=(Math.random()-0.5)*60}
+  geo.setAttribute('position',new THREE.BufferAttribute(pos,3));
+  var mat=new THREE.PointsMaterial({color:0xb9ff66,size:0.15,transparent:true,opacity:0.6});
+  window.particleMat=mat;
+  var pts=new THREE.Points(geo,mat);
+  scene.add(pts);
+  /* Add floating torus */
+  var torusGeo=new THREE.TorusGeometry(8,0.3,16,100);
+  var torusMat=new THREE.MeshBasicMaterial({color:0xb9ff66,transparent:true,opacity:0.08,wireframe:true});
+  var torus=new THREE.Mesh(torusGeo,torusMat);
+  scene.add(torus);
+  var torus2=new THREE.Mesh(new THREE.TorusGeometry(12,0.2,16,100),new THREE.MeshBasicMaterial({color:0x39ff14,transparent:true,opacity:0.05,wireframe:true}));
+  scene.add(torus2);
+  function animate(){requestAnimationFrame(animate);pts.rotation.y+=0.001;pts.rotation.x+=0.0005;torus.rotation.x+=0.003;torus.rotation.y+=0.002;torus2.rotation.x-=0.002;torus2.rotation.z+=0.001;renderer.render(scene,camera)}
+  animate();
+  window.addEventListener('resize',function(){camera.aspect=window.innerWidth/window.innerHeight;camera.updateProjectionMatrix();renderer.setSize(window.innerWidth,window.innerHeight)});
+}
 
 window.addEventListener('load',function(){
   setTimeout(function(){document.getElementById('loader').classList.add('hide')},1200);
-  setTimeout(function(){initBento();updateCounts();renderContacts()},1500);
+  setTimeout(function(){initBento();updateCounts();renderContacts();initThree()},1500);
 });
+
 </script>
 </body>
 </html>
