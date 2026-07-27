@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="bs" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>LeadFlow Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="v2/style.9bd8a88c.css">
+</head>
+<body>
+<canvas id="particleCanvas"></canvas>
+<div class="noise-overlay"></div>
+<div class="login-overlay" id="loginOverlay">
+  <div class="login-box">
+    <div class="login-logo">Lead<span class="g">Flow</span></div>
+    <div class="login-sub">Platforma za upravljanje leadovima</div>
+    <div class="login-avatars" id="loginAvatars"></div>
+    <div class="login-field">
+      <label>Lozinka</label>
+      <input type="password" id="loginPass" placeholder="Unesi lozinku...">
+    </div>
+    <button class="login-btn" id="doLogin">Prijavi se</button>
+    <div class="login-err" id="loginErr"></div>
+  </div>
+</div>
+<div class="app-layout" id="appLayout">
+  <div class="sidebar" id="sidebarIcons"></div>
+  <div class="main-area">
+    <div class="topbar">
+      <button class="hamburger" id="hamburgerBtn" onclick="toggleMobileSidebar()">☰</button>
+      <div class="topbar-left">
+        <div class="topbar-title" id="topTitle"></div>
+        <div class="topbar-bc" id="topBC"></div>
+      </div>
+      <div class="topbar-right">
+        <button class="tb-btn" onclick="toggleAIRight()">🤖 AI Mentor</button>
+        <div class="topbar-avatar" id="topAvatar"></div>
+      </div>
+    </div>
+    <div class="content-scroll" id="contentScroll"></div>
+  </div>
+  <div class="sidebar-right" id="sidebarRight">
+    <div class="ai-header">
+      <div class="ai-avatar">🤖</div>
+      <div class="ai-title">
+        <div class="ai-title-text" id="topAvatarTitle"></div>
+        <div class="ai-title-sub">AI Mentor</div>
+      </div>
+      <button class="ai-close" onclick="toggleAIRight()">✕</button>
+      <div class="ai-dot"></div>
+    </div>
+    <div class="ai-tabs" id="aiTabs"></div>
+    <div class="ai-content" id="aiContent"></div>
+    <div class="ai-input-wrap">
+      <textarea class="ai-input" id="aiInput" placeholder="Pitaj AI mentora..." rows="1" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();aiSend()}"></textarea>
+      <button class="ai-send" onclick="aiSend()">➤</button>
+    </div>
+  </div>
+</div>
+<div class="modal-overlay" id="contactModal" onclick="if(event.target===this)closeContactModal()">
+  <div class="modal-box" id="contactModalBox"></div>
+</div>
+<div class="theme-switcher" id="themeSwitcher" onclick="toggleThemePanel()">
+  <div class="theme-icon">🎨</div>
+  <div class="theme-panel" id="themePanel" onclick="event.stopPropagation()">
+    <div class="theme-panel-title">Tema</div>
+    <div class="theme-options" id="themeOptions"></div>
+  </div>
+</div>
+<div class="tarot-overlay" id="tarotOverlay">
+  <div class="tarot-section" id="tarotSection"></div>
+</div>
+<div class="toast-box" id="toastBox"></div>
+<script src="v2/data.d6e6ed64.js"></script>
+<script src="v2/app.8403d704.js"></script>
+</body>
+</html>
