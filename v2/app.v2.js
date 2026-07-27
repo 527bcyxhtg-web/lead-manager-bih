@@ -30,13 +30,14 @@ var sidebar_open=false, ai_open=false, theme_panel_open=false;
 /* ═══════════════════════════════════════════
    INIT
    ═══════════════════════════════════════════ */
-document.addEventListener('DOMContentLoaded',function(){
+function boot(){
   initTheme();
   initParticles();
   showLogin();
   document.getElementById('doLogin').addEventListener('click',doLogin);
   document.getElementById('loginPass').addEventListener('keydown',function(e){if(e.key==='Enter')doLogin()});
-});
+}
+if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',boot);}else{boot();}
 
 /* ═══════════════════════════════════════════
    THEME
