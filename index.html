@@ -453,7 +453,7 @@ function initThree(){
   window.addEventListener('resize',function(){camera.aspect=window.innerWidth/window.innerHeight;camera.updateProjectionMatrix();renderer.setSize(window.innerWidth,window.innerHeight)});
 }
 
-window.addEventListener('load',function(){
+window.addEventListener('DOMContentLoaded',function(){
   setTimeout(function(){document.getElementById('loader').classList.add('hide')},1200);
   setTimeout(function(){initBento();updateCounts();renderContacts();initThree()},1500);
 });
