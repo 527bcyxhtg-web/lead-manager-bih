@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="bs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>📋 Lead Manager — BiH</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📋</text></svg>">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#09090b;--card:#18181b;--card2:#27272a;--border:#3f3f46;--text:#fafafa;--muted:#a1a1aa;--accent:#8b5cf6;--green:#22c55e;--red:#ef4444;--orange:#f59e0b;--blue:#3b82f6;--pink:#ec4899}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.header{background:linear-gradient(135deg,#0f0520 0%,#1e0a3c 50%,#0f0520 100%);padding:40px 24px 24px;text-align:center;border-bottom:1px solid rgba(139,92,246,0.2)}
+.header h1{font-size:2rem;font-weight:800;background:linear-gradient(135deg,#fff,#c084fc);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:4px}
+.header p{color:var(--muted);font-size:0.9rem}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;padding:20px 24px;max-width:800px;margin:0 auto}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;text-align:center}
+.stat .num{font-size:1.8rem;font-weight:700}
+.stat .lbl{font-size:0.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-top:2px}
+.progress-wrap{padding:0 24px 16px;max-width:800px;margin:0 auto}
+.progress-bar{height:8px;background:var(--card);border-radius:99px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--green));border-radius:99px;transition:width 0.4s ease}
+.progress-text{text-align:center;font-size:0.8rem;color:var(--muted);margin-top:6px}
+.controls{display:flex;gap:10px;padding:0 24px 16px;max-width:800px;margin:0 auto;flex-wrap:wrap}
+.search{flex:1;min-width:200px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:10px 16px;color:var(--text);font-size:0.9rem;font-family:inherit;outline:none}
+.search:focus{border-color:var(--accent)}
+.search::placeholder{color:#52525b}
+.fbtn{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:10px 16px;color:var(--muted);font-size:0.8rem;cursor:pointer;font-family:inherit;font-weight:500;transition:all 0.15s}
+.fbtn:hover,.fbtn.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+.list{padding:0 24px 80px;max-width:800px;margin:0 auto}
+.contact{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;margin-bottom:10px;transition:all 0.2s}
+.contact:hover{border-color:rgba(139,92,246,0.4);box-shadow:0 0 20px rgba(139,92,246,0.08)}
+.contact.done{border-color:rgba(34,197,94,0.3);opacity:0.7}
+.contact.in_progress{border-color:rgba(245,158,11,0.3)}
+.company{font-size:1.05rem;font-weight:700;color:#fff;line-height:1.3}
+.owner{font-size:0.8rem;color:var(--muted);margin-top:2px}
+.meta{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:8px;font-size:0.75rem;font-weight:500}
+.badge.city{background:rgba(139,92,246,0.12);color:#c084fc}
+.badge.cat{background:rgba(59,130,246,0.12);color:#60a5fa}
+.badge.phone{background:rgba(34,197,94,0.12);color:#4ade80}
+.badge.email{background:rgba(245,158,11,0.12);color:#fbbf24}
+.badge.web{background:rgba(236,72,153,0.12);color:#f472b6}
+.notes-wrap{margin-top:10px}
+.notes-input{width:100%;background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;color:var(--text);font-size:0.85rem;font-family:inherit;outline:none;resize:vertical;min-height:40px;transition:border-color 0.2s}
+.notes-input:focus{border-color:var(--accent)}
+.notes-input::placeholder{color:#52525b}
+.actions{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.abtn{border:none;border-radius:10px;padding:8px 14px;font-size:0.8rem;font-weight:600;cursor:pointer;font-family:inherit;transition:all 0.15s;display:flex;align-items:center;gap:5px}
+.abtn.pending{background:rgba(139,92,246,0.15);color:#c084fc}
+.abtn.pending:hover{background:var(--accent);color:#fff}
+.abtn.in_progress{background:rgba(245,158,11,0.15);color:#fbbf24}
+.abtn.in_progress:hover{background:var(--orange);color:#000}
+.abtn.done{background:rgba(34,197,94,0.15);color:#4ade80}
+.abtn.done:hover{background:var(--green);color:#000}
+.abtn.called{background:rgba(236,72,153,0.15);color:#f472b6}
+.abtn.called:hover{background:var(--pink);color:#fff}
+.empty{text-align:center;padding:60px 20px;color:var(--muted)}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--card2);border:1px solid var(--accent);border-radius:12px;padding:12px 24px;color:var(--text);font-size:0.9rem;z-index:999;opacity:0;transition:opacity 0.3s;pointer-events:none}
+.toast.show{opacity:1}
+.export-bar{display:flex;gap:10px;justify-content:center;padding:0 24px 20px;max-width:800px;margin:0 auto}
+.expbtn{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:8px 16px;color:var(--muted);font-size:0.8rem;cursor:pointer;font-family:inherit;font-weight:500;transition:all 0.15s}
+.expbtn:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
+@media(max-width:600px){.stats{grid-template-columns:repeat(2,1fr);gap:8px;padding:16px}.stat .num{font-size:1.3rem}.header h1{font-size:1.5rem}}
+</style>
+</head>
+<body>
+<div class="header">
+<h1>📋 Lead Manager — BiH</h1>
+<p>Označite kontakte koje ste kontaktirali i ostavite bilješke</p>
+</div>
+<div class="stats">
+<div class="stat"><div class="num" style="color:var(--accent)" id="sTotal">0</div><div class="lbl">Ukupno</div></div>
+<div class="stat"><div class="num" style="color:var(--muted)" id="sPending">0</div><div class="lbl">Čeka</div></div>
+<div class="stat"><div class="num" style="color:var(--orange)" id="sProgress">0</div><div class="lbl">U toku</div></div>
+<div class="stat"><div class="num" style="color:var(--green)" id="sDone">0</div><div class="lbl">Završeno</div></div>
+</div>
+<div class="progress-wrap">
+<div class="progress-bar"><div class="progress-fill" id="pFill" style="width:0%"></div></div>
+<div class="progress-text" id="pText">0% završeno</div>
+</div>
+<div class="controls">
+<input type="text" class="search" id="search" placeholder="🔍 Pretraži firmu, grad, kategoriju...">
+<button class="fbtn on" onclick="setF(this,'all')">Svi</button>
+<button class="fbtn" onclick="setF(this,'pending')">Čeka</button>
+<button class="fbtn" onclick="setF(this,'in_progress')">U toku</button>
+<button class="fbtn" onclick="setF(this,'done')">Završeno</button>
+<button class="fbtn" onclick="setF(this,'called')">📞 Zvali</button>
+</div>
+<div class="export-bar">
+<button class="expbtn" onclick="exportCSV()">📥 Export CSV</button>
+<button class="expbtn" onclick="exportJSON()">📥 Export JSON</button>
+<button class="expbtn" onclick="resetAll()">🔄 Reset sve</button>
+</div>
+<div class="list" id="list"></div>
+<div class="toast" id="toast"></div>
+<script>
+const DB='lead_manager_biH';
+let C=[],filter='all';
+const L=[["Almir","Alibegović","Frizerski salon A.A. Alibegović","Sarajevo","frizerski salon","+387 33 537 539","","Nema web — listing na bascarsija.ba"],["Amela","Husić","Frizerski salon Amela s.z.r.","Sarajevo","frizerski salon","+387 62 583 854","","Baščaršija — nema web stranicu"],["","","Beauty Salon Na-Na","Sarajevo","kozmetički salon","+387 61 666 002","info@na-na.ba","Stupska 19-B2"],["","","Beauty First Salon & Spa d.o.o.","Sarajevo","kozmetički salon","+387 33 977 913","","Ilidža — nema web stranicu"],["","","Ženski frizerski salon KIM","Sarajevo","frizerski salon","+387 33 667 513","","Avde Hume 21"],["Sead","Rizvić","Restoran Sarajevo Vl Rizvić","Sarajevo","restoran","+387 61 053 678","","Restoran bez web sajta"],["Semih","Aslan","Restoran Sofra d.o.o.","Sarajevo","restoran","+387 33 447 815","","Baščaršija 31"],["","","Auto Servis Team","Sarajevo","auto servis","+387 61 552 168","","Samo Facebook stranica"],["","","Autoelektra","Sarajevo","auto servis","+387 33 444 749","aesa@bih.net.ba","Patriotske lige 10"],["","","Automotive Center","Sarajevo","auto servis","+387 33 715 465","","Vilsonovo šetalište 10"],["","","Auto Servis DEL","Sarajevo","auto servis","+387 62 1","","Urijan Dedina 48"],["","","Dodir Kozmetički salon","Sarajevo","kozmetički salon","+387 33 204 756","info@dodir.ba","Grbavička 5"],["","","Salon Estetika","Sarajevo","kozmetički salon","+387 61 030 504","","Kemala Kapetanovića 13"],["","","Nova Beauty d.o.o.","Sarajevo","kozmetički salon","+387 62 725 741","","Direktor: Fazlić Alma"],["","","Pekara AS d.o.o.","Sarajevo","pekara","+387 33 610 286","","Direktor: Gjuraj"],["","","Pekara EDI d.o.o.","Sarajevo","pekara","+387 62 412 405","","Ilidža"],["","","SAPLAST d.o.o.","Sarajevo","stolarija","+387 33 779 500","info@saplast.ba","Nikole Šopa 245"],["","","ELOX d.o.o.","Sarajevo","stolarija","+387 61 984 333","info@elox.ba","Put Famosa 38"],["","","BH Werk d.o.o.","Sarajevo","stolarija","+387 62 853 773","info@bhwerk.com","Vogošćanskih odreda 44D"],["","","DOM-A d.o.o.","Sarajevo","stolarija","+387 61 264 233","info@dom-a.ba","PVC i ALU stolarija"],["Miroslav","Tomić","Lokal Caffe Miroslav Tomić s.p.","Banja Luka","caffe bar","+387 65 385 026","tomicmiroslav00@gmail.com",""],["","","Caffe Bar ARIA","Banja Luka","caffe bar","","","Bana Milosavljevića 1"],["","","Restoran Kastel","Banja Luka","restoran","","",""],["","","Pekara Mlinar","Banja Luka","pekara","","","Lanac pekara"],["","","Fitness centar Fit Zone","Banja Luka","fitness studio","","",""],["","","Tehnomag","Banja Luka","trgovina","+387 51 200 000","banjaluka@tehnomag.com","Lanac trgovina"],["","","Motorex P.J. Bihać 1","Bihać","auto dijelovi","+387 37 351 833","","37 retail objekata u BiH"],["","","Cvjećara Vernisaž","Bihać","cvjećara","+387 62 595 946","cvjecara.vernisaz@gmail.com",""],["","","Cvjećara S-Garden","Bihać","cvjećara","+387 63 597 585","cvjecarasgarden@gmail.com","TC Bingo Bihać"],["Snježana","Rajković","Cvjećara Iris Bihać","Bihać","cvjećara","+387 66 955 874","",""],["","","DELFIN Autopraona Vl. Helđić","Bihać","autopraonica","+387 61 591 903","",""],["","","Auto Lider d.o.o.","Brčko","auto","+387 61 600 008","","Mostarska bb"],["Adis","Selimović","Autolimar ADO","Brčko","autolimar","+387 62 180 655","","Alije Selimovića"],["","","Autolimar i Lakirer Šiša","Brčko","autolimar","+387 61 425 314","","Samo Facebook"],["","","Vulkanizer Brzi Servis Marić","Grude","vulkanizer","+387 63 326 099","","Pokraj puta Imotski-Grude"],["","","COKUL COMMERCE d.o.o.","Grude","vulkanizer","+387 39 661 601","",""],["","","Foto Studio Franjić","Novi Travnik","photo studio","+387 30 791 536","foto.franjic@gmail.com",""],["","","Studio Level","Novi Travnik","photo studio","+387 63 595 500","info@studio-level.com","72290 Novi Travnik"],["","","Foto-Video Studio Home","Novi Travnik","photo studio","+387 62 33","",""],["","","Caffe Studio","Novi Travnik","caffe bar","+387 30 790 600","margetonij@gmail.com","Samo Facebook"],["","","Pulmont d.o.o.","Zenica","građevinska firma","+387 32 402 045","","Direktor: Sabahudin Đuherić"],["","","EN-BE Građevinski obrt","Zenica","građevinska firma","+387 61 451 939","crjasko@gmail.com","Gorica 46"],["","","Techno Shop Zenica","Zenica","trgovina","+387 32 249 111","zenica@technoshop.ba","Kamberovića čikma bb"],["","","Tehnomag Zenica","Zenica","trgovina","+387 32 445 740","zenica@tehnomag.com","Lanac trgovina"],["","","ES OPTIC Visoko","Visoko","optika","+387 62 148 462","esopticvisoko@gmail.com","Musala 1"],["","","Optika Tihić","Visoko","optika","+387 61 925 925","","Kralja Tvrtka bb"],["","","Optika Beganović","Visoko","optika","+387 62 750 800","","Čaršijska Visoko"],["","","BB NEW LOOK d.o.o.","Mostar","trgovina odjećom","+387 36 317 299","","Vlasnik: Boro Bandić"],["","","ANGEL'S FASHION d.o.o.","Mostar","trgovina odjećom","+387 36 322 360","","Vlasnik: Ivana Džidić"],["","","Moda Best d.o.o.","Mostar","trgovina odjećom","+387 36 836 257","","Vlasnik: Ivan Grgić"],["","","FREE SHOP d.o.o.","Mostar","trgovina odjećom","+387 36 550 385","","Vlasnik: Damir Beljo"],["","","Elko Marić d.o.o.","Mostar","električar","+387 36 558 080","elkomaric@bih.net.ba","Maršala Tita 294"],["","","Elektro Mont Mostar","Mostar","električar","+387 36 334 334","elektro-mont@tel.net.ba","Put za Aluminij"],["","","Intertekstil","Široki Brijeg","trgovina odjećom","+387 39 705 451","","Gojka Šuška 2A"],["","","Boutique Markos","Široki Brijeg","trgovina odjećom","+387 39 705 743","dpenava85@gmail.com","",""],["","","SARTEKS d.o.o.","Široki Brijeg","trgovina","+387 39 701 838","sarteks1@tel.net.ba","Uzarići bb"],["","","EUROM d.o.o.","Široki Brijeg","trgovina","+387 39 705 411","euromsb1@gmail.com","Igračke i kućanske potrepštine"],["","","Dječiji vrtić Ljubuški","Ljubuški","dječiji vrtić","+387 39 833 261","d.vrtic.ljubuski@gmail.com","Grad Ljubuški"],["","","Restoran Labirint","Mostar","restoran","","",""],["","","La-Tour Agencija","Čapljina","putnička agencija","+387 63 320 325","info@la-touragency.com","Višići Čapljina"],["","","Čapljinka Turistička org.","Čapljina","putnička agencija","+387 36 806 147","tur.org.capljina@tel.net.ba","Mate Bobana bb"],["","","Hotel Turist '98","Jajce","hotel","+387 30 658 151","utd.turist98@tel.net.ba","Kulina bana 1"],["","","Hotel Plivsko Jezero","Jajce","hotel","+387 30 654 090","reception@plivskojezero.com","Jajce"],["Boban","Savić","Advokatska kancelarija Savić","Doboj","advokat","+387 66 490 494","bobansavic84@gmail.com","Svetog Save 24"],["Irena","Puzić-Obradović","Adv. kancelarija Puzić-Obradović","Doboj","advokat","+387 53 222 030","irenapuzic@yahoo.com",""],["","","Finel Računovodstvo i Revizija","Tuzla","računovodstvo","+387 35 262 370","info@finel.ba","Stupine B9"],["","","Revis Računovodstvo","Tuzla","računovodstvo","+387 35 270 094","revis@revis.ba","Kazan mahala 36"],["","","ESGfin Tuzla","Tuzla","računovodstvo","+387 61 480 834","info@esgfin.ba",""],["","","Atria d.o.o.","Tuzla","računovodstvo","+387 61 732 398","info@atria.ba","Titanik zgrada"],["","","Fitness Studio Fuke","Tuzla","fitness studio","+387 61 179 000","","Mije Keroševića 20"],["","","Fitness Studio Dobar Osjećaj","Tuzla","fitness studio","+387 61 271 655","","Armije BiH 15"],["","","Fitness & Aerobic Studio LIFE","Tuzla","fitness studio","+387 61 855 843","",""],["","","Feel Good Fitness Studio","Tuzla","fitness studio","","feelgoodfitness875@gmail.com","Samo Facebook"]];
+function ls(){try{return JSON.parse(localStorage.getItem(DB))||{}}catch(e){return{}}}
+function ss(s){localStorage.setItem(DB,JSON.stringify(s))}
+function gc(){const st=ls();return L.map((l,i)=>{const id='c'+i;return{id,owner:[l[0],l[1]].filter(Boolean).join(' '),company:l[2],city:l[3],category:l[4],phone:l[5],email:l[6],notes:l[7]||'',status:(st[id]||{}).status||'pending',called:(st[id]||{}).called||false,custNotes:(st[id]||{}).notes||''};})}
+function uc(id,f,v){const st=ls();if(!st[id])st[id]={status:'pending',called:false,notes:''};st[id][f]=v;ss(st);}
+function render(){
+  const q=document.getElementById('search').value.toLowerCase();
+  let d=gc();
+  if(filter==='called')d=d.filter(c=>c.called);else if(filter!=='all')d=d.filter(c=>c.status===filter);
+  if(q)d=d.filter(c=>(c.company+c.city+c.category+c.owner+c.custNotes).toLowerCase().includes(q));
+  const all=gc(),done=all.filter(c=>c.status==='done').length,prog=all.filter(c=>c.status==='in_progress').length,pct=all.length?Math.round(done/all.length*100):0;
+  document.getElementById('sTotal').textContent=all.length;
+  document.getElementById('sDone').textContent=done;
+  document.getElementById('sProgress').textContent=prog;
+  document.getElementById('sPending').textContent=all.length-done-prog;
+  document.getElementById('pFill').style.width=pct+'%';
+  document.getElementById('pText').textContent=pct+'% završeno ('+done+'/'+all.length+')';
+  const list=document.getElementById('list');
+  if(!d.length){list.innerHTML='<div class="empty"><div style="font-size:3rem;margin-bottom:12px">📭</div><p>Nema kontakata za prikaz</p></div>';return;}
+  list.innerHTML=d.map(c=>{const sc=c.status==='done'?'done':c.status==='in_progress'?'in_progress':'';return`<div class="contact ${sc}"><div><div class="company">${c.company}</div>${c.owner?'<div class="owner">'+c.owner+'</div>':''}</div><div class="meta"><span class="badge city">📍 ${c.city}</span><span class="badge cat">🏷 ${c.category}</span>${c.phone?'<span class="badge phone">📞 '+c.phone+'</span>':''}${c.email?'<span class="badge email">✉️ '+c.email+'</span>':''}</div>${c.notes?'<div style="margin-top:6px;padding:8px 12px;background:var(--card2);border-radius:8px;font-size:0.85rem;color:var(--muted)">ℹ️ '+c.notes+'</div>':''}${c.custNotes?'<div style="margin-top:6px;padding:8px 12px;background:rgba(139,92,246,0.08);border-radius:8px;font-size:0.85rem;color:#c084fc">📝 '+c.custNotes+'</div>':''}<div class="actions"><button class="abtn pending" onclick="setS('${c.id}','pending')">↩️ Čeka</button><button class="abtn in_progress" onclick="setS('${c.id}','in_progress')">⏳ U toku</button><button class="abtn done" onclick="setS('${c.id}','done')">✅ Završeno</button><button class="abtn called" onclick="tC('${c.id}')">📞 ${c.called?'Zvali':'Nazovi'}</button></div><div class="notes-wrap"><textarea class="notes-input" placeholder="Dodaj bilješku..." onblur="sN('${c.id}',this.value)">${c.custNotes||''}</textarea></div></div>`;}).join('');}
+function setS(id,s){uc(id,'status',s);render();t(s==='done'?'✅ Završeno':s==='in_progress'?'⏳ U toku':'↩️ Čeka');}
+function tC(id){const st=ls();const v=!((st[id]||{}).called);uc(id,'called',v);render();t(v?'📞 Zvano':'↩️ Maknuto');}
+function sN(id,n){uc(id,'notes',n);}
+function setF(b,f){filter=f;document.querySelectorAll('.fbtn').forEach(x=>x.classList.remove('on'));b.classList.add('on');render();}
+function t(m){const e=document.getElementById('toast');e.textContent=m;e.classList.add('show');setTimeout(()=>e.classList.remove('show'),2000);}
+function exportCSV(){const all=gc();let csv='Firma,Vlasnik,Grad,Kategorija,Telefon,Email,Bilješke,Status,Zvali\n';all.forEach(c=>{csv+='"'+c.company+'","'+c.owner+'","'+c.city+'","'+c.category+'","'+c.phone+'","'+c.email+'","'+(c.custNotes||c.notes)+'","'+c.status+'","'+(c.called?'Da':'Ne')+'"\n';});dl('leadovi-bih.csv',csv,'text/csv');}
+function exportJSON(){dl('leadovi-bih.json',JSON.stringify(gc(),null,2),'application/json');}
+function dl(n,c,t){const b=new Blob([c],{type:t}),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=n;a.click();URL.revokeObjectURL(u);t('📥 Preuzeto: '+n);}
+function resetAll(){if(confirm('Resetovati sve statuse?')){localStorage.removeItem(DB);render();t('🔄 Sve resetovano');}}
+document.getElementById('search').addEventListener('input',render);
+render();
+</script>
+</body>
+</html>
