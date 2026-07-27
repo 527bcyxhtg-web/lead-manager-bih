@@ -1,605 +1,614 @@
-/* LeadFlow Platform v2 — App Logic */
+/* LeadFlow Platform v2 — App Logic (Complete) */
 
-var USERS=[
-  {id:'natasa',name:'Nataša Damnjanović',role:'Agent – BiH',avatar:'👩‍💼',color:'#00ffaa',password:'lead2024'},
-  {id:'ana',name:'Ana Marić',role:'Agent – Hrvatska',avatar:'👩‍💻',color:'#00ccff',password:'lead2024'},
-  {id:'marko',name:'Marko Petrović',role:'Agent – Srbija',avatar:'👨‍💼',color:'#ff00aa',password:'lead2024'},
-  {id:'admin',name:'Admin',role:'Administrator',avatar:'👑',color:'#ffaa00',password:'admin123'}
-];
+/* ═══════════════════════════════════════════════════════════════
+   0. GLOBALS & CONSTANTS
+   ═══════════════════════════════════════════════════════════════ */
 
-var COUNTRIES={ba:'Bosna i Hercegovina',hr:'Hrvatska',rs:'Srbija'};
-var FLAGS={ba:'🇧🇦',hr:'🇭🇷',rs:'🇷🇸'};
+var currentUser = null;
+var currentView = 'overview';
+var currentCountry = 'ba';
+var currentAgent = null;
+var selectedContact = null;
+var aiTab = 'chat';
+var mobileSidebarOpen = false;
+var aiOpen = false;
+var themePanelOpen = false;
 
-var CAT_ICONS={
-  'Frizerski salon':'✂️','Kozmetički salon':'💆','Restoran':'🍽️','Auto servis':'🔧',
-  'Caffe bar':'☕','Trgovina':'🛒','Stolarija':'🪵','Cvjećara':'🌸',
-  'Autopraonica':'🚗','Auto dijelovi':'⚙️','Optika':'👓','Trgovina odjećom':'👖',
-  'Električar':'⚡','Putnička agencija':'✈️','Hotel':'🏨','Advokat':'⚖️',
-  'Računovodstvo':'📊','Fitness':'💪','Pekara':'🥐','Autolimar':'🔨',
-  'Građevinska':'🏗️','Stomatologija':'🦷','Knjižar':'📚','Fitness studio':'🏋️','Auto':'🚗'
+var COUNTRY_FLAGS = { ba: '🇧🇦', hr: '🇭🇷', rs: '🇷🇸' };
+var COUNTRY_NAMES = { ba: 'Bosna i Hercegovina', hr: 'Hrvatska', rs: 'Srbija' };
+
+var CAT_ICONS = {
+  'Frizerski salon': '✂️', 'Kozmetički salon': '💆', 'Restoran': '🍽️',
+  'Auto servis': '🔧', 'Caffe bar': '☕', 'Trgovina': '🛒',
+  'Stolarija': '🪵', 'Cvjećara': '🌸', 'Autopraonica': '🚗',
+  'Auto dijelovi': '⚙️', 'Optika': '👓', 'Trgovina odjećom': '👖',
+  'Električar': '⚡', 'Putnička agencija': '✈️', 'Hotel': '🏨',
+  'Advokat': '⚖️', 'Računovodstvo': '📊', 'Fitness': '💪',
+  'Pekara': '🥐', 'Autolimar': '🔨', 'Građevinska': '🏗️',
+  'Stomatologija': '🦷', 'Knjižara': '📚', 'Fitness studio': '🏋️',
+  'Auto': '🚗'
 };
 
-var current_user=null, current_view='overview', current_country='ba', selected=null;
-var sidebar_open=false, ai_open=false, theme_panel_open=false;
+var AI_SCRIPTS = [
+  { title: 'Hladan poziv — uvod', desc: 'Kratki uvod za novog klijenta', tag: '📞 Poziv', text: 'Dobar dan, zovem iz LeadFlow agencije. Vidjeli smo vaše poslovanje i mislimo da vam možemo pomoći s digitalnim marketingom. Imate li 2 minuta?' },
+  { title: 'Follow-up email', desc: 'Nakon prvog kontakta', tag: '📧 Email', text: 'Poštovani, zahvaljujem se na razgovoru. Kao što smo dogovorili, šaljem vam ponudu za naše usluge. Molim vas da pogledate i javite se s pitanjima.' },
+  { title: 'Obnova kontakta', desc: 'Za stare klijente', tag: '🔄 Restart', text: 'Zdravo, dugo se nismo čuli! Željeli smo vidjeti kako ide vaše poslovanje i ponuditi vam nove mogućnosti koje imamo.' },
+  { title: 'Predstavljanje demoa', desc: 'Poziv za demo termin', tag: '💻 Demo', text: 'Imamo sjajan alat koji vam može pomoći da pratite sve vaše kontakte na jednom mjestu. Želite li besplatni demo?' },
+  { title: 'Zatvaranje prodaje', desc: 'Završni korak', tag: '💰 Prodaja', text: 'Vidjeli ste sve prednosti. Danas je idealan dan da krenemo. Potpisujemo ugovor i krećemo odmah!' }
+];
 
-/* ═══════════════════════════════════════════
-   INIT
-   ═══════════════════════════════════════════ */
-function boot(){
-  console.log('LeadFlow booting...');
-  initTheme();
+/* ═══════════════════════════════════════════════════════════════
+   1. BOOT / INIT
+   ═══════════════════════════════════════════════════════════════ */
+
+function boot() {
+  migrateContacts();
+  seedContacts();
+  setTheme(getTheme());
+  tryRestoreSession();
   initParticles();
-  showLogin();
-  document.getElementById('doLogin').addEventListener('click',doLogin);
-  document.getElementById('loginPass').addEventListener('keydown',function(e){if(e.key==='Enter')doLogin()});
-}
-if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',boot);}else{boot();}
-
-/* ═══════════════════════════════════════════
-   THEME
-   ═══════════════════════════════════════════ */
-function initTheme(){
-  var saved=localStorage.getItem('lf-theme')||'dark';
-  var accent=localStorage.getItem('lf-accent')||'#00ffaa';
-  document.documentElement.setAttribute('data-theme',saved);
-  document.documentElement.style.setProperty('--accent',accent);
-  document.documentElement.style.setProperty('--accent-glow',accent+'33');
+  initScrollObserver();
+  initRippleEffects();
+  bindLoginEvents();
 }
 
-function toggleThemePanel(){
-  theme_panel_open=!theme_panel_open;
-  var p=document.getElementById('themePanel');
-  p.style.display=theme_panel_open?'block':'none';
-  if(theme_panel_open) renderThemeOptions();
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', boot);
+} else {
+  boot();
 }
 
-function renderThemeOptions(){
-  var el=document.getElementById('themeOptions');
-  var themes=[{name:'Dark',val:'dark'},{name:'Light',val:'light'},{name:'Deep Space',val:'deep-space'}];
-  var accents=['#00ffaa','#00ccff','#ff00aa','#ffaa00','#aa66ff','#ff4444','#44ff44'];
-  var h='';
-  themes.forEach(function(t){
-    var active=document.documentElement.getAttribute('data-theme')===t.val;
-    h+='<button class="theme-opt'+(active?' active':'')+'" onclick="setTheme(\''+t.val+'\')">'+t.name+'</button>';
+function bindLoginEvents() {
+  var btn = document.getElementById('doLogin');
+  if (btn) btn.addEventListener('click', doLogin);
+  var pass = document.getElementById('loginPass');
+  if (pass) pass.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') doLogin();
   });
-  h+='<div style="margin-top:12px;font-size:11px;opacity:.5">Accent</div><div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap">';
-  accents.forEach(function(c){
-    var cur=getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();
-    h+='<div onclick="setAccent(\''+c+'\')" style="width:28px;height:28px;border-radius:50%;background:'+c+';cursor:pointer;border:2px solid '+(cur===c?'#fff':'transparent')+';box-shadow:0 0 8px '+c+'44"></div>';
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   2. LOGIN SYSTEM
+   ═══════════════════════════════════════════════════════════════ */
+
+function showLogin() {
+  var el = document.getElementById('loginAvatars');
+  if (!el) return;
+  var h = '';
+  USERS.forEach(function (u) {
+    h += '<div class="login-av" id="lav-' + u.id + '" onclick="selectLoginUser(\'' + u.id + '\',this)">';
+    h += '<div style="width:56px;height:56px;border-radius:14px;background:' + u.color + ';display:flex;align-items:center;justify-content:center;font-family:var(--font-h);font-weight:700;font-size:.85rem;color:#000">' + u.initials + '</div>';
+    h += '<div class="login-av-name">' + u.name.split(' ')[0] + '</div>';
+    h += '</div>';
   });
-  h+='</div>';
-  el.innerHTML=h;
+  el.innerHTML = h;
 }
 
-function setTheme(t){
-  document.documentElement.setAttribute('data-theme',t);
-  localStorage.setItem('lf-theme',t);
-  renderThemeOptions();
-}
-
-function setAccent(c){
-  document.documentElement.style.setProperty('--accent',c);
-  document.documentElement.style.setProperty('--accent-glow',c+'33');
-  localStorage.setItem('lf-accent',c);
-  renderThemeOptions();
-}
-
-/* ═══════════════════════════════════════════
-   PARTICLES
-   ═══════════════════════════════════════════ */
-function initParticles(){
-  var canvas=document.getElementById('particleCanvas');
-  if(!canvas) return;
-  var ctx=canvas.getContext('2d');
-  var particles=[];
-  function resize(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;}
-  resize();
-  window.addEventListener('resize',resize);
-  for(var i=0;i<60;i++){
-    particles.push({
-      x:Math.random()*canvas.width, y:Math.random()*canvas.height,
-      vx:(Math.random()-.5)*.3, vy:(Math.random()-.5)*.3,
-      r:Math.random()*2+.5, a:Math.random()*.4+.1
-    });
-  }
-  function draw(){
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-    var accent=getComputedStyle(document.documentElement).getPropertyValue('--accent').trim()||'#00ffaa';
-    particles.forEach(function(p){
-      p.x+=p.vx; p.y+=p.vy;
-      if(p.x<0)p.x=canvas.width; if(p.x>canvas.width)p.x=0;
-      if(p.y<0)p.y=canvas.height; if(p.y>canvas.height)p.y=0;
-      ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
-      ctx.fillStyle=accent; ctx.globalAlpha=p.a; ctx.fill();
-    });
-    ctx.globalAlpha=1;
-    requestAnimationFrame(draw);
-  }
-  draw();
-}
-
-/* ═══════════════════════════════════════════
-   LOGIN
-   ═══════════════════════════════════════════ */
-function showLogin(){
-  console.log('showLogin called');
-  var el=document.getElementById('loginAvatars');
-  if(!el){console.error('loginAvatars not found');return;}
-  var h='';
-  USERS.forEach(function(u){
-    h+='<div class="avatar-card" onclick="selectAvatar(\''+u.id+'\')" id="av-'+u.id+'">';
-    h+='<div class="avatar-emoji">'+u.avatar+'</div>';
-    h+='<div class="avatar-name">'+u.name+'</div>';
-    h+='<div class="avatar-role">'+u.role+'</div></div>';
-  });
-  el.innerHTML=h;
-}
-
-function selectAvatar(id){
-  document.querySelectorAll('.avatar-card').forEach(function(c){c.classList.remove('selected')});
-  var card=document.getElementById('av-'+id);
-  if(card) card.classList.add('selected');
-  current_user=USERS.find(function(u){return u.id===id});
+function selectLoginUser(uid, el) {
+  document.querySelectorAll('.login-av').forEach(function (c) { c.classList.remove('sel'); });
+  if (el) el.classList.add('sel');
+  currentUser = USERS.find(function (u) { return u.id === uid; });
   document.getElementById('loginPass').focus();
 }
 
-function doLogin(){
-  if(!current_user){showToast('Odaberi profil!','error');return;}
-  var pass=document.getElementById('loginPass').value;
-  if(pass!==current_user.password){
-    document.getElementById('loginErr').textContent='Pogrešna lozinka!';
+function showLoginErr(msg) {
+  var e = document.getElementById('loginErr');
+  if (e) { e.textContent = msg; e.style.display = 'block'; }
+}
+
+function initLoginAvatars() {
+  showLogin();
+}
+
+function tryRestoreSession() {
+  var saved = localStorage.getItem(DB + '_session');
+  if (saved) {
+    try {
+      var uid = saved;
+      currentUser = USERS.find(function (u) { return u.id === uid; });
+      if (currentUser) {
+        showApp();
+        return;
+      }
+    } catch (e) { /* ignore */ }
+  }
+  showLogin();
+}
+
+function doLogin() {
+  if (!currentUser) { showLoginErr('Odaberi profil!'); return; }
+  var pass = document.getElementById('loginPass').value;
+  if (pass !== currentUser.pass) {
+    showLoginErr('Pogrešna lozinka!');
     return;
   }
-  document.getElementById('loginOverlay').style.display='none';
-  document.getElementById('appLayout').style.display='flex';
-  initApp();
+  localStorage.setItem(DB + '_session', currentUser.id);
+  showApp();
 }
 
-/* ═══════════════════════════════════════════
-   APP INIT
-   ═══════════════════════════════════════════ */
-function initApp(){
-  renderSidebar();
-  renderTopbar();
-  navigateTo('overview');
-  renderThemeSwitcher();
+function doLogout() {
+  currentUser = null;
+  localStorage.removeItem(DB + '_session');
+  currentView = 'overview';
+  currentCountry = 'ba';
+  currentAgent = null;
+  showLogin();
+  var overlay = document.getElementById('loginOverlay');
+  if (overlay) { overlay.classList.remove('hidden'); overlay.style.display = ''; }
+  var app = document.getElementById('appLayout');
+  if (app) { app.classList.remove('active'); app.style.display = ''; }
 }
 
-function renderSidebar(){
-  var items=[
-    {id:'overview',icon:'📊',label:'Pregled'},
-    {id:'ba',icon:'🇧🇦',label:'BiH'},
-    {id:'hr',icon:'🇭🇷',label:'Hrvatska'},
-    {id:'rs',icon:'🇷🇸',label:'Srbija'},
-    {id:'tarot',icon:'🔮',label:'Tarot'},
-    {id:'settings',icon:'⚙️',label:'Postavke'}
-  ];
-  var el=document.getElementById('sidebarIcons');
-  var h='';
-  items.forEach(function(it){
-    var active=(it.id===current_view||(it.id===current_country&&current_view==='country'))?' active':'';
-    h+='<div class="sidebar-item'+active+'" onclick="navigateTo(\''+it.id+'\')">';
-    h+='<div class="sidebar-icon">'+it.icon+'</div>';
-    h+='<div class="sidebar-label">'+it.label+'</div></div>';
-  });
-  el.innerHTML=h;
+function showLogin() {
+  var overlay = document.getElementById('loginOverlay');
+  if (overlay) { overlay.classList.remove('hidden'); overlay.style.display = ''; }
+  var app = document.getElementById('appLayout');
+  if (app) { app.classList.remove('active'); app.style.display = 'none'; }
+  initLoginAvatars();
 }
 
-function renderTopbar(){
-  var title='Pregled';
-  if(current_view==='country') title=FLAGS[current_country]+' '+COUNTRIES[current_country];
-  else if(current_view==='tarot') title='🔮 Tarot dnevnik';
-  else if(current_view==='settings') title='⚙️ Postavke';
-  document.getElementById('topTitle').textContent=title;
-  document.getElementById('topAvatar').innerHTML=current_user.avatar;
-  var t=document.getElementById('topAvatarTitle');
-  if(t) t.textContent=current_user.name;
+function showApp() {
+  var overlay = document.getElementById('loginOverlay');
+  if (overlay) { overlay.classList.add('hidden'); overlay.style.display = 'none'; }
+  var app = document.getElementById('appLayout');
+  if (app) { app.classList.add('active'); app.style.display = 'grid'; }
+  render();
 }
 
-function renderThemeSwitcher(){
-  document.getElementById('themeSwitcher').style.display='flex';
+/* ═══════════════════════════════════════════════════════════════
+   3. MASTER RENDER
+   ═══════════════════════════════════════════════════════════════ */
+
+function render() {
+  updateTopbar();
+  updateSidebar();
+  renderContent();
 }
 
-function navigateTo(id){
-  if(['ba','hr','rs'].indexOf(id)>=0){
-    current_country=id; current_view='country';
+function updateTopbar() {
+  var titleEl = document.getElementById('topTitle');
+  var bcEl = document.getElementById('topBC');
+  var avEl = document.getElementById('topAvatar');
+  var avTitle = document.getElementById('topAvatarTitle');
+
+  if (currentView === 'overview') {
+    if (titleEl) titleEl.textContent = '📊 Pregled';
+    if (bcEl) bcEl.textContent = 'Sve države';
+  } else if (currentView === 'country') {
+    if (titleEl) titleEl.textContent = (COUNTRY_FLAGS[currentCountry] || '') + ' ' + (COUNTRY_NAMES[currentCountry] || currentCountry);
+    if (bcEl) bcEl.textContent = 'Kontakti po državi';
+  } else if (currentView === 'agent') {
+    var ag = USERS.find(function (u) { return u.id === currentAgent; });
+    if (titleEl) titleEl.textContent = (ag ? ag.name : 'Agent');
+    if (bcEl) bcEl.textContent = (COUNTRY_FLAGS[currentCountry] || '') + ' ' + (COUNTRY_NAMES[currentCountry] || '');
+  } else if (currentView === 'tarot') {
+    if (titleEl) titleEl.textContent = '✨ Tarot';
+    if (bcEl) bcEl.textContent = 'Dnevna kartica';
   } else {
-    current_view=id;
+    if (titleEl) titleEl.textContent = '📊 Pregled';
+    if (bcEl) bcEl.textContent = '';
   }
-  renderSidebar();
-  renderTopbar();
-  renderContent();
+
+  if (avEl && currentUser) {
+    avEl.textContent = currentUser.initials;
+    avEl.style.background = currentUser.color;
+    avEl.style.color = '#000';
+    avEl.style.borderRadius = '8px';
+    avEl.style.display = 'flex';
+    avEl.style.alignItems = 'center';
+    avEl.style.justifyContent = 'center';
+    avEl.style.fontFamily = 'var(--font-h)';
+    avEl.style.fontWeight = '700';
+    avEl.style.fontSize = '.7rem';
+    avEl.style.cursor = 'pointer';
+    avEl.onclick = function () { doLogout(); };
+  }
+  if (avTitle && currentUser) {
+    avTitle.textContent = currentUser.name;
+  }
 }
 
-function renderContent(){
-  var el=document.getElementById('contentScroll');
-  if(current_view==='overview') renderOverview(el);
-  else if(current_view==='country') renderCountry(el);
-  else if(current_view==='tarot') renderTarot(el);
-  else if(current_view==='settings') renderSettings(el);
-}
+function updateSidebar() {
+  var el = document.getElementById('sidebarIcons');
+  if (!el) return;
 
-/* ═══════════════════════════════════════════
-   OVERVIEW
-   ═══════════════════════════════════════════ */
-function renderOverview(el){
-  var all=getContacts();
-  var total=all.length;
-  var done=all.filter(function(c){return c.status==='done'}).length;
-  var pending=total-done;
-  var sale_yes=all.filter(function(c){return c.sale==='yes'}).length;
-  var categories={};
-  all.forEach(function(c){categories[c.category]=(categories[c.category]||0)+1});
-  var topCats=Object.keys(categories).sort(function(a,b){return categories[b]-categories[a]}).slice(0,5);
+  var items = [
+    { id: 'overview', icon: '📊', label: 'Pregled' },
+    { id: 'ba', icon: '🇧🇦', label: 'BiH' },
+    { id: 'hr', icon: '🇭🇷', label: 'Hrvatska' },
+    { id: 'rs', icon: '🇷🇸', label: 'Srbija' },
+    { id: 'tarot', icon: '✨', label: 'Tarot' }
+  ];
 
-  var h='<div class="overview-grid">';
-  h+=statCard('📋','Ukupno leadova',total);
-  h+=statCard('✅','Završeno',done);
-  h+=statCard('⏳','U toku',pending);
-  h+=statCard('💰','Prodaja uspjela',sale_yes);
-  h+='</div>';
+  var h = '';
+  items.forEach(function (it) {
+    var isActive = false;
+    if (it.id === 'overview' && currentView === 'overview') isActive = true;
+    if (it.id === currentCountry && (currentView === 'country' || currentView === 'agent')) isActive = true;
+    if (it.id === 'tarot' && currentView === 'tarot') isActive = true;
 
-  h+='<div class="section-title">Top kategorije</div><div class="cat-grid">';
-  topCats.forEach(function(cat){
-    h+='<div class="cat-pill">'+(CAT_ICONS[cat]||'📌')+' '+cat+' <span class="cat-count">'+categories[cat]+'</span></div>';
+    h += '<div class="sidebar-icon' + (isActive ? ' active' : '') + '" onclick="switchView(\'' + it.id + '\')" title="' + it.label + '">';
+    h += '<span>' + it.icon + '</span>';
+    h += '</div>';
   });
-  h+='</div>';
 
-  h+='<div class="section-title">Po državama</div><div class="overview-grid">';
-  Object.keys(COUNTRIES).forEach(function(cc){
-    var cc_contacts=all.filter(function(c){return c.country===cc});
-    h+='<div class="stat-card clickable" onclick="navigateTo(\''+cc+'\')">';
-    h+='<div class="stat-icon">'+FLAGS[cc]+'</div>';
-    h+='<div class="stat-label">'+COUNTRIES[cc]+'</div>';
-    h+='<div class="stat-value">'+cc_contacts.length+'</div></div>';
-  });
-  h+='</div>';
+  h += '<div class="sidebar-sep"></div>';
+  h += '<div class="sidebar-bottom">';
+  h += '<div class="sidebar-icon" onclick="doLogout()" title="Odjava"><span>🚪</span></div>';
+  h += '</div>';
 
-  el.innerHTML=h;
+  el.innerHTML = h;
 }
 
-function statCard(icon,label,value){
-  return '<div class="stat-card"><div class="stat-icon">'+icon+'</div><div class="stat-value">'+value+'</div><div class="stat-label">'+label+'</div></div>';
+function renderContent() {
+  var el = document.getElementById('contentScroll');
+  if (!el) return;
+
+  /* Page transition: fade out */
+  el.classList.add('page-transition');
+  el.style.opacity = '0';
+  el.style.transform = 'translateY(8px)';
+
+  setTimeout(function () {
+    /* Show skeleton briefly */
+    el.innerHTML = renderSkeleton();
+
+    setTimeout(function () {
+      if (currentView === 'overview') renderOverview(el);
+      else if (currentView === 'country') renderCountry(el);
+      else if (currentView === 'agent') renderAgentContacts(el);
+      else if (currentView === 'tarot') renderTarotOverlay();
+      else renderOverview(el);
+
+      /* Fade in */
+      el.style.opacity = '1';
+      el.style.transform = 'translateY(0)';
+      el.classList.remove('page-transition');
+      initScrollObserver();
+      initRippleEffects();
+      animateNumbers(el);
+    }, 300);
+  }, 200);
 }
 
-/* ═══════════════════════════════════════════
-   COUNTRY VIEW
-   ═══════════════════════════════════════════ */
-function renderCountry(el){
-  var contacts=getContacts().filter(function(c){return c.country===current_country});
-  var agents=getAgentsForCountry(current_country);
+function switchView(id) {
+  if (id === 'ba' || id === 'hr' || id === 'rs') {
+    currentCountry = id;
+    currentView = 'country';
+    currentAgent = null;
+  } else {
+    currentView = id;
+  }
+  closeMobileSidebar();
+  render();
+}
 
-  var h='<div class="country-header">';
-  h+='<div class="country-flag-big">'+FLAGS[current_country]+'</div>';
-  h+='<div class="country-stats">';
-  h+='<span>'+contacts.length+' kontakata</span>';
-  h+='<span>'+contacts.filter(function(c){return c.status==='done'}).length+' završeno</span>';
-  h+='</div></div>';
+/* ═══════════════════════════════════════════════════════════════
+   4. SKELETON LOADING
+   ═══════════════════════════════════════════════════════════════ */
 
-  if(agents.length>0){
-    h+='<div class="agent-tabs">';
-    h+='<div class="agent-tab active" onclick="filterAgent(null,this)">Svi</div>';
-    agents.forEach(function(a){
-      h+='<div class="agent-tab" onclick="filterAgent(\''+a.id+'\',this)">'+a.avatar+' '+a.name.split(' ')[0]+'</div>';
+function renderSkeleton() {
+  var h = '';
+  h += '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px">';
+  for (var i = 0; i < 4; i++) {
+    h += '<div class="skeleton" style="height:90px;border-radius:var(--radius-xs)"></div>';
+  }
+  h += '</div>';
+  for (var j = 0; j < 5; j++) {
+    h += '<div class="skeleton" style="height:64px;margin-bottom:6px;border-radius:var(--radius-xs)"></div>';
+  }
+  return h;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   5. OVERVIEW
+   ═══════════════════════════════════════════════════════════════ */
+
+function renderOverview(el) {
+  var all = getAllContacts();
+  var total = all.length;
+  var done = all.filter(function (c) { return c.status === 'done'; }).length;
+  var inProgress = all.filter(function (c) { return c.status === 'in_progress'; }).length;
+  var pending = all.filter(function (c) { return c.status === 'pending'; }).length;
+  var lost = all.filter(function (c) { return c.status === 'lost'; }).length;
+  var saleSuccess = all.filter(function (c) { return c.saleOutcome === 'success'; }).length;
+  var demosSent = all.filter(function (c) { return c.demoSent; }).length;
+
+  var h = '';
+
+  /* Bento stats */
+  h += '<div class="bento">';
+  h += bentoCard('📋', total, 'Ukupno leadova', 'var(--text)');
+  h += bentoCard('✅', done, 'Završeno', 'var(--success)');
+  h += bentoCard('🔄', inProgress, 'U toku', 'var(--info)');
+  h += bentoCard('⏳', pending, 'Na čekanju', 'var(--warn)');
+  h += '</div>';
+
+  h += '<div class="bento">';
+  h += bentoCard('❌', lost, 'Izgubljeno', 'var(--danger)');
+  h += bentoCard('💰', saleSuccess, 'Uspješna prodaja', 'var(--success)');
+  h += bentoCard('📧', demosSent, 'Demo poslano', 'var(--info)');
+  h += bentoCard('🏆', total > 0 ? Math.round(done / total * 100) : 0, 'Konverzija %', 'var(--accent)');
+  h += '</div>';
+
+  /* Categories */
+  var cats = {};
+  all.forEach(function (c) { cats[c.cat] = (cats[c.cat] || 0) + 1; });
+  var topCats = Object.keys(cats).sort(function (a, b) { return cats[b] - cats[a]; }).slice(0, 8);
+
+  if (topCats.length > 0) {
+    h += '<div class="anim-in"><div style="font-family:var(--font-h);font-weight:700;font-size:1rem;margin:16px 0 10px">📌 Kategorije</div>';
+    h += '<div style="display:flex;flex-wrap:wrap;gap:6px">';
+    topCats.forEach(function (cat) {
+      h += '<div class="glass-card" style="padding:8px 14px;display:flex;align-items:center;gap:6px;cursor:default">';
+      h += '<span>' + (CAT_ICONS[cat] || '📌') + '</span>';
+      h += '<span style="font-size:.82rem;font-weight:600">' + cat + '</span>';
+      h += '<span style="font-size:.7rem;color:var(--text2);background:rgba(255,255,255,.05);padding:2px 7px;border-radius:100px">' + cats[cat] + '</span>';
+      h += '</div>';
     });
-    h+='</div>';
+    h += '</div></div>';
   }
 
-  h+='<div class="search-bar"><input type="text" placeholder="🔍 Pretraži kontakate..." id="searchInput" oninput="filterContacts()"></div>';
-
-  h+='<div class="contact-list" id="contactList">';
-  contacts.forEach(function(c){ h+=contactCard(c); });
-  h+='</div>';
-
-  el.innerHTML=h;
-}
-
-function getAgentsForCountry(cc){
-  if(cc==='ba') return USERS.filter(function(u){return u.id==='natasa'||u.id==='admin'});
-  if(cc==='hr') return USERS.filter(function(u){return u.id==='ana'||u.id==='admin'});
-  if(cc==='rs') return USERS.filter(function(u){return u.id==='marko'||u.id==='admin'});
-  return [];
-}
-
-function contactCard(c){
-  var statusClass=c.status==='done'?'done':'pending';
-  var saleBadge='';
-  if(c.status==='done'){
-    saleBadge=c.sale==='yes'?'<span class="badge badge-success">✅ Prodaja</span>':'<span class="badge badge-fail">❌ Bez prodaje</span>';
-  }
-  return '<div class="contact-card '+statusClass+'" data-id="'+c.id+'" onclick="openContact(\''+c.id+'\')">'+
-    '<div class="cc-top"><div class="cc-name">'+c.name+'</div>'+
-    '<div class="cc-company">'+c.company+'</div></div>'+
-    '<div class="cc-bottom"><span class="cc-cat">'+(CAT_ICONS[c.category]||'📌')+' '+c.category+'</span>'+
-    '<span class="cc-phone">📞 '+c.phone+'</span>'+
-    saleBadge+'</div>'+
-    (c.comment?'<div class="cc-comment">💬 '+c.comment.substring(0,60)+(c.comment.length>60?'...':'')+'</div>':'')+
-    '</div>';
-}
-
-function filterContacts(){
-  var q=(document.getElementById('searchInput')||{}).value||'';
-  q=q.toLowerCase();
-  var cards=document.querySelectorAll('.contact-card');
-  cards.forEach(function(card){
-    var id=card.getAttribute('data-id');
-    var c=getContacts().find(function(x){return x.id===id});
-    if(!c) return;
-    var match=c.name.toLowerCase().indexOf(q)>=0||c.company.toLowerCase().indexOf(q)>=0||c.category.toLowerCase().indexOf(q)>=0||c.phone.indexOf(q)>=0;
-    card.style.display=match?'':'none';
-  });
-}
-
-function filterAgent(agentId,tabEl){
-  document.querySelectorAll('.agent-tab').forEach(function(t){t.classList.remove('active')});
-  if(tabEl) tabEl.classList.add('active');
-}
-
-/* ═══════════════════════════════════════════
-   CONTACT DETAIL MODAL
-   ═══════════════════════════════════════════ */
-function openContact(id){
-  selected=getContacts().find(function(c){return c.id===id});
-  if(!selected) return;
-  var c=selected;
-  var box=document.getElementById('contactModalBox');
-
-  var h='<div class="modal-header">';
-  h+='<div class="modal-avatar">'+(CAT_ICONS[c.category]||'📌')+'</div>';
-  h+='<div><div class="modal-name">'+c.name+'</div>';
-  h+='<div class="modal-company">'+c.company+'</div></div>';
-  h+='<button class="modal-close" onclick="closeContactModal()">✕</button></div>';
-
-  h+='<div class="modal-info-grid">';
-  h+='<div class="modal-info"><span class="mi-label">📞 Telefon</span><span class="mi-val">'+c.phone+'</span></div>';
-  if(c.email) h+='<div class="modal-info"><span class="mi-label">✉️ Email</span><span class="mi-val">'+c.email+'</span></div>';
-  h+='<div class="modal-info"><span class="mi-label">📌 Kategorija</span><span class="mi-val">'+c.category+'</span></div>';
-  h+='<div class="modal-info"><span class="mi-label">🌍 Država</span><span class="mi-val">'+FLAGS[c.country]+' '+COUNTRIES[c.country]+'</span></div>';
-  if(c.owner) h+='<div class="modal-info"><span class="mi-label">👤 Vlasnik</span><span class="mi-val">'+c.owner+'</span></div>';
-  h+='</div>';
-
-  h+='<div class="modal-section-title">Status</div>';
-  h+='<div class="status-controls">';
-  h+='<button class="status-btn '+(c.status==='done'?'active-done':'')+'" onclick="setStatus(\''+c.id+'\',\'done\')">✅ Završeno</button>';
-  h+='<button class="status-btn '+(c.status==='pending'?'active-pending':'')+'" onclick="setStatus(\''+c.id+'\',\'pending\')">⏳ U toku</button>';
-  h+='</div>';
-
-  if(c.status==='done'){
-    h+='<div class="modal-section-title">Prodaja</div>';
-    h+='<div class="status-controls">';
-    h+='<button class="sale-btn '+(c.sale==='yes'?'active-yes':'')+'" onclick="setSale(\''+c.id+'\',\'yes\')">💰 Uspješna</button>';
-    h+='<button class="sale-btn '+(c.sale==='no'?'active-no':'')+'" onclick="setSale(\''+c.id+'\',\'no\')">🚫 Neuspješna</button>';
-    h+='</div>';
-  }
-
-  h+='<div class="modal-section-title">Komentar</div>';
-  h+='<textarea class="comment-input" id="commentInput" placeholder="Dodaj komentar..." rows="3">'+(c.comment||'')+'</textarea>';
-  h+='<button class="save-comment-btn" onclick="saveComment(\''+c.id+'\')">💾 Spremi komentar</button>';
-
-  box.innerHTML=h;
-  document.getElementById('contactModal').style.display='flex';
-}
-
-function closeContactModal(){
-  document.getElementById('contactModal').style.display='none';
-  selected=null;
-}
-
-function setStatus(id,status){
-  var contacts=getContacts();
-  var c=contacts.find(function(x){return x.id===id});
-  if(c){c.status=status;c.sale=status==='pending'?null:c.sale;}
-  saveContacts(contacts);
-  openContact(id);
-  renderContent();
-  showToast(status==='done'?'✅ Kontakt označen kao završen':'⏳ Kontakt vraćen u toku');
-}
-
-function setSale(id,val){
-  var contacts=getContacts();
-  var c=contacts.find(function(x){return x.id===id});
-  if(c) c.sale=val;
-  saveContacts(contacts);
-  openContact(id);
-  showToast(val==='yes'?'💰 Prodaja zabilježena!':'🚫 Prodaja označena kao neuspješna');
-}
-
-function saveComment(id){
-  var val=(document.getElementById('commentInput')||{}).value||'';
-  var contacts=getContacts();
-  var c=contacts.find(function(x){return x.id===id});
-  if(c) c.comment=val;
-  saveContacts(contacts);
-  showToast('💬 Komentar spremljen');
-}
-
-/* ═══════════════════════════════════════════
-   TAROT
-   ═══════════════════════════════════════════ */
-var TAROT_CARDS=[
-  {name:'The Fool',emoji:'🃏',meaning:'Novi počeci, avantura, nevinost'},
-  {name:'The Magician',emoji:'🎩',meaning:'Manifestacija, vještina, volja'},
-  {name:'The High Priestess',emoji:'🌙',meaning:'Intuicija, tajne, podsvijest'},
-  {name:'The Empress',emoji:'👑',meaning:'Plodnost, ljepota, priroda'},
-  {name:'The Emperor',emoji:'🏛️',meaning:'Autoritet, struktura, stabilnost'},
-  {name:'The Hierophant',emoji:'📿',meaning:'Tradicionalno znanje, vjera'},
-  {name:'The Lovers',emoji:'💕',meaning:'Ljubav, izbor, harmonija'},
-  {name:'The Chariot',emoji:'🏎️',meaning:'Pobjeda, odlučnost, snaga'},
-  {name:'Strength',emoji:'🦁',meaning:'Unutarnja snaga, hrabrost'},
-  {name:'The Hermit',emoji:'🏔️',meaning:'Mudrost, unutrašnje traženje'},
-  {name:'Wheel of Fortune',emoji:'🎡',meaning:'Sudbina, ciklusi, promjene'},
-  {name:'The Star',emoji:'⭐',meaning:'Nada, inspiracija, mir'},
-  {name:'The Moon',emoji:'🌕',meaning:'Iluzije, strahovi, podsvijest'},
-  {name:'The Sun',emoji:'☀️',meaning:'Sreća, uspjeh, energija'},
-  {name:'Judgement',emoji:'📯',meaning:'Buđenje, poziv, procjena'},
-  {name:'The World',emoji:'🌍',meaning:'Završetak, postignuće, putovanje'}
-];
-
-function renderTarot(el){
-  var history=JSON.parse(localStorage.getItem('lf-tarot')||'[]');
-  var h='<div class="tarot-container">';
-  h+='<div class="tarot-title">🔮 Dnevnik tarot karata</div>';
-  h+='<div class="tarot-subtitle">Povuci kartu za današnji dan</div>';
-  h+='<button class="tarot-pull-btn" onclick="pullTarot()">✨ Vuci kartu</button>';
-  h+='<div id="tarotResult"></div>';
-
-  if(history.length>0){
-    h+='<div class="tarot-history-title">Prethodna izvlačenja</div>';
-    history.slice(-10).reverse().forEach(function(entry){
-      h+='<div class="tarot-entry">';
-      h+='<div class="tarot-entry-date">'+entry.date+'</div>';
-      h+='<div class="tarot-entry-card">'+entry.card.emoji+' <strong>'+entry.card.name+'</strong></div>';
-      h+='<div class="tarot-entry-meaning">'+entry.card.meaning+'</div>';
-      if(entry.note) h+='<div class="tarot-entry-note">📝 '+entry.note+'</div>';
-      h+='</div>';
+  /* Country cards */
+  h += '<div class="anim-in"><div style="font-family:var(--font-h);font-weight:700;font-size:1rem;margin:16px 0 10px">🌍 Po državama</div>';
+  h += '<div class="overview-grid">';
+  ['ba', 'hr', 'rs'].forEach(function (cc) {
+    var ccContacts = all.filter(function (c) { return c.country === cc; });
+    var ccDone = ccContacts.filter(function (c) { return c.status === 'done'; }).length;
+    var ccSale = ccContacts.filter(function (c) { return c.saleOutcome === 'success'; }).length;
+    var ccAgents = USERS.filter(function (u) { return u.country === cc; });
+    h += '<div class="overview-card ' + cc + '" onclick="switchView(\'' + cc + '\')">';
+    h += '<div class="oc-flag">' + COUNTRY_FLAGS[cc] + '</div>';
+    h += '<div class="oc-name">' + COUNTRY_NAMES[cc] + '</div>';
+    h += '<div class="oc-count">' + ccContacts.length + ' kontakata · ' + ccDone + ' završeno · ' + ccSale + ' prodaja</div>';
+    h += '<div class="oc-teams">';
+    ccAgents.forEach(function (ag) {
+      var agCount = all.filter(function (c) { return c.owner === ag.id; }).length;
+      h += '<div class="oc-team"><span>' + ag.name.split(' ')[0] + '</span><span style="color:var(--accent);font-weight:600">' + agCount + '</span></div>';
     });
+    h += '</div></div>';
+  });
+  h += '</div></div>';
+
+  el.innerHTML = h;
+}
+
+function bentoCard(icon, value, label, color) {
+  return '<div class="bento-card anim-in">' +
+    '<div class="b-icon" style="background:rgba(255,255,255,.04);color:' + (color || 'var(--text)') + '">' + icon + '</div>' +
+    '<div class="b-val" data-count-to="' + value + '">' + value + '</div>' +
+    '<div class="b-lbl">' + label + '</div></div>';
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   6. COUNTRY VIEW
+   ═══════════════════════════════════════════════════════════════ */
+
+function renderCountry(el) {
+  var contacts = getCountryContacts(currentCountry);
+  var agents = USERS.filter(function (u) { return u.country === currentCountry || u.country === 'all'; });
+
+  var h = '';
+
+  /* Country header */
+  h += '<div class="anim-in" style="display:flex;align-items:center;gap:14px;margin-bottom:16px">';
+  h += '<div style="font-size:2.4rem">' + COUNTRY_FLAGS[currentCountry] + '</div>';
+  h += '<div><div style="font-family:var(--font-h);font-weight:700;font-size:1.1rem">' + COUNTRY_NAMES[currentCountry] + '</div>';
+  h += '<div style="font-size:.78rem;color:var(--text2)">' + contacts.length + ' kontakata ukupno</div></div>';
+  h += '</div>';
+
+  /* Team cards */
+  h += '<div class="anim-in"><div style="font-family:var(--font-h);font-weight:700;font-size:.95rem;margin-bottom:10px">👥 Tim</div>';
+  h += '<div class="team-grid">';
+  agents.forEach(function (ag) {
+    if (ag.country === 'all') return;
+    var agContacts = contacts.filter(function (c) { return c.owner === ag.id; });
+    var agDone = agContacts.filter(function (c) { return c.status === 'done'; }).length;
+    var isActive = currentAgent === ag.id;
+    h += '<div class="team-card' + (isActive ? ' active-card' : '') + '" onclick="selectAgent(\'' + ag.id + '\')">';
+    h += '<div class="team-av" style="background:' + ag.color + ';color:#000">' + ag.initials + '</div>';
+    h += '<div class="team-name">' + ag.name + '</div>';
+    h += '<div class="team-role">' + ag.role + '</div>';
+    h += '<div class="team-stats">';
+    h += '<div class="team-stat"><div class="team-stat-val">' + agContacts.length + '</div><div class="team-stat-lbl">Leadovi</div></div>';
+    h += '<div class="team-stat"><div class="team-stat-val">' + agDone + '</div><div class="team-stat-lbl">Završeno</div></div>';
+    h += '<div class="team-stat"><div class="team-stat-val">' + agContacts.length > 0 ? Math.round(agDone / agContacts.length * 100) : 0 + '%</div><div class="team-stat-lbl">Stopa</div></div>';
+    h += '</div></div>';
+  });
+  h += '</div></div>';
+
+  /* Add form */
+  h += renderAddForm();
+
+  /* Contact list */
+  h += '<div class="anim-in"><div style="font-family:var(--font-h);font-weight:700;font-size:.95rem;margin-bottom:10px">📋 Kontakti</div>';
+  h += '<div class="contact-list" id="contactList">';
+  contacts.forEach(function (c) {
+    h += renderContactItem(c);
+  });
+  if (contacts.length === 0) {
+    h += '<div style="text-align:center;padding:40px;color:var(--text3)">Nema kontakata u ovoj državi</div>';
   }
-  h+='</div>';
-  el.innerHTML=h;
+  h += '</div></div>';
+
+  el.innerHTML = h;
 }
 
-function pullTarot(){
-  var card=TAROT_CARDS[Math.floor(Math.random()*TAROT_CARDS.length)];
-  var today=new Date().toLocaleDateString('bs-BA');
-  var history=JSON.parse(localStorage.getItem('lf-tarot')||'[]');
+/* ═══════════════════════════════════════════════════════════════
+   7. AGENT CONTACTS VIEW
+   ═══════════════════════════════════════════════════════════════ */
 
-  var todayEntry=history.find(function(e){return e.date===today});
-  if(todayEntry){
-    document.getElementById('tarotResult').innerHTML=
-      '<div class="tarot-pulled">'+todayEntry.card.emoji+'<div class="tp-name">'+todayEntry.card.name+'</div>'+
-      '<div class="tp-meaning">'+todayEntry.card.meaning+'</div>'+
-      '<div class="tp-date">Već izvučeno danas</div></div>';
-    return;
+function renderAgentContacts(el) {
+  if (!currentAgent) { renderCountry(el); return; }
+  var agent = USERS.find(function (u) { return u.id === currentAgent; });
+  var contacts = getUserContacts(currentAgent);
+
+  var h = '';
+
+  h += '<div class="anim-in" style="display:flex;align-items:center;gap:14px;margin-bottom:16px">';
+  h += '<div style="width:48px;height:48px;border-radius:12px;background:' + (agent ? agent.color : 'var(--accent)') + ';display:flex;align-items:center;justify-content:center;font-family:var(--font-h);font-weight:700;color:#000;font-size:.9rem">' + (agent ? agent.initials : '??') + '</div>';
+  h += '<div><div style="font-family:var(--font-h);font-weight:700;font-size:1.05rem">' + (agent ? agent.name : 'Nepoznat') + '</div>';
+  h += '<div style="font-size:.78rem;color:var(--text2)">' + COUNTRY_FLAGS[currentCountry] + ' ' + contacts.length + ' kontakata</div></div>';
+  h += '<button class="btn-ghost" onclick="currentAgent=null;switchView(\'' + currentCountry + '\')" style="margin-left:auto;font-size:.75rem">← Nazad</button>';
+  h += '</div>';
+
+  /* Stats */
+  var done = contacts.filter(function (c) { return c.status === 'done'; }).length;
+  var sale = contacts.filter(function (c) { return c.saleOutcome === 'success'; }).length;
+  h += '<div class="bento">';
+  h += bentoCard('📋', contacts.length, 'Ukupno', 'var(--text)');
+  h += bentoCard('✅', done, 'Završeno', 'var(--success)');
+  h += bentoCard('💰', sale, 'Prodaja', 'var(--success)');
+  h += bentoCard('📧', contacts.filter(function (c) { return c.demoSent; }).length, 'Demo', 'var(--info)');
+  h += '</div>';
+
+  /* Add form */
+  h += renderAddForm();
+
+  /* Contact list */
+  h += '<div class="anim-in"><div class="contact-list" id="contactList">';
+  contacts.forEach(function (c) {
+    h += renderContactItem(c);
+  });
+  if (contacts.length === 0) {
+    h += '<div style="text-align:center;padding:40px;color:var(--text3)">Nema kontakata za ovog agenta</div>';
   }
+  h += '</div></div>';
 
-  var note=prompt('Dodaj bilješku za današnju kartu (opcionalno):')||'';
-  history.push({date:today,card:card,note:note});
-  localStorage.setItem('lf-tarot',JSON.stringify(history));
-
-  document.getElementById('tarotResult').innerHTML=
-    '<div class="tarot-pulled animate">'+card.emoji+'<div class="tp-name">'+card.name+'</div>'+
-    '<div class="tp-meaning">'+card.meaning+'</div>'+
-    (note?'<div class="tp-note">📝 '+note+'</div>':'')+
-    '<div class="tp-date">'+today+'</div></div>';
+  el.innerHTML = h;
 }
 
-/* ═══════════════════════════════════════════
-   SETTINGS
-   ═══════════════════════════════════════════ */
-function renderSettings(el){
-  var h='<div class="settings-container">';
-  h+='<div class="settings-title">⚙️ Postavke</div>';
-  h+='<div class="setting-group">';
-  h+='<div class="setting-label">Trenutni korisnik</div>';
-  h+='<div class="setting-val">'+current_user.avatar+' '+current_user.name+' ('+current_user.role+')</div></div>';
-  h+='<div class="setting-group">';
-  h+='<div class="setting-label">Ukupno kontakata</div>';
-  h+='<div class="setting-val">'+getContacts().length+'</div></div>';
-  h+='<div class="setting-group">';
-  h+='<div class="setting-label">Izlaz</div>';
-  h+='<button class="logout-btn" onclick="doLogout()">🚪 Odjavi se</button></div>';
-  h+='</div>';
-  el.innerHTML=h;
+function selectAgent(agentId) {
+  currentAgent = agentId;
+  currentView = 'agent';
+  render();
 }
 
-function doLogout(){
-  current_user=null;
-  document.getElementById('appLayout').style.display='none';
-  document.getElementById('loginOverlay').style.display='flex';
-  document.getElementById('loginPass').value='';
-  document.querySelectorAll('.avatar-card').forEach(function(c){c.classList.remove('selected')});
+/* ═══════════════════════════════════════════════════════════════
+   8. CONTACT CARD RENDERING
+   ═══════════════════════════════════════════════════════════════ */
+
+function renderContactItem(c) {
+  var id = c._id || '';
+  var statusClass = 's-pending';
+  var statusLabel = '⏳ Pending';
+  if (c.status === 'in_progress') { statusClass = 's-progress'; statusLabel = '🔄 In Progress'; }
+  if (c.status === 'done') { statusClass = 's-done'; statusLabel = '✅ Done'; }
+  if (c.status === 'lost') { statusClass = 's-lost'; statusLabel = '❌ Lost'; }
+
+  var saleIcon = c.saleOutcome === 'success' ? '✅ Uspješna' : (c.saleOutcome === 'failed' ? '❌ Neuspješna' : '💰 —');
+  var saleClass = c.saleOutcome === 'success' ? 'sale-btn-green' : (c.saleOutcome === 'failed' ? 'sale-btn-red' : '');
+  var demoLabel = c.demoSent ? '📧 Da' : '📧 Ne';
+  var demoClass = c.demoSent ? 'demo-btn' : '';
+
+  var h = '';
+
+  /* Main card */
+  h += '<div class="contact-item ' + statusClass + '" data-id="' + id + '">';
+  h += '<div class="ci-avatar" style="background:rgba(255,255,255,.06)">' + (CAT_ICONS[c.cat] || '📌') + '</div>';
+  h += '<div class="ci-info" onclick="openContactModal(\'' + id + '\')">';
+  h += '<div class="ci-name">' + (c.company || 'Nepoznat') + '</div>';
+  h += '<div class="ci-meta">';
+  if (c.city) h += '<span class="city">' + c.city + '</span>';
+  h += '<span>' + (c.cat || '') + '</span>';
+  if (c.phone) h += '<span>📞 ' + c.phone + '</span>';
+  h += '</div></div>';
+
+  /* Inline action buttons */
+  h += '<div class="ci-actions">';
+  /* Complete button */
+  h += '<div class="ci-btn done-btn" onclick="event.stopPropagation();cycleStatusInline(\'' + id + '\')" title="Označi završeno">✅</div>';
+  /* Reset button */
+  h += '<div class="ci-btn" onclick="event.stopPropagation();resetStatusInline(\'' + id + '\')" title="Resetuj na pending">🔄</div>';
+  /* Comment toggle */
+  h += '<div class="ci-btn" onclick="event.stopPropagation();toggleComment(\'' + id + '\')" title="Komentar">💬</div>';
+  /* Sale toggle */
+  h += '<div class="ci-btn ' + saleClass + '" onclick="event.stopPropagation();toggleSaleInline(\'' + id + '\')" title="Prodaja">' + (c.saleOutcome === 'success' ? '✅' : '💰') + '</div>';
+  /* Demo toggle */
+  h += '<div class="ci-btn ' + demoClass + '" onclick="event.stopPropagation();toggleDemoInline(\'' + id + '\')" title="Demo">' + (c.demoSent ? '📧' : '📩') + '</div>';
+  /* Status badge */
+  h += '<span class="ci-status ' + statusClass + '">' + statusLabel + '</span>';
+  h += '</div>';
+  h += '</div>';
+
+  /* Comment section (expandable) */
+  h += '<div class="contact-comment" id="comment-' + id + '">';
+  h += '<textarea placeholder="Dodaj komentar..." onblur="saveContactComment(\'' + id + '\',this.value)">' + (c.comments || '') + '</textarea>';
+  h += '</div>';
+
+  return h;
 }
 
-/* ═══════════════════════════════════════════
-   AI MENTOR
-   ═══════════════════════════════════════════ */
-function toggleAIRight(){
-  ai_open=!ai_open;
-  var sb=document.getElementById('sidebarRight');
-  sb.style.display=ai_open?'flex':'none';
+/* ═══════════════════════════════════════════════════════════════
+   9. INLINE CONTACT ACTIONS
+   ═══════════════════════════════════════════════════════════════ */
+
+function cycleStatusInline(id) {
+  var contacts = getContacts();
+  if (!contacts[id]) return;
+  var c = contacts[id];
+  if (c.status === 'pending') c.status = 'in_progress';
+  else if (c.status === 'in_progress') c.status = 'done';
+  else c.status = 'done';
+  addTimelineEntry(id, 'Status promijenjen na: ' + c.status);
+  saveContacts(contacts);
+  toast('✅ Status ažuriran: ' + c.status);
+  render();
 }
 
-function aiSend(){
-  var input=document.getElementById('aiInput');
-  var msg=input.value.trim();
-  if(!msg) return;
-  input.value='';
+function resetStatusInline(id) {
+  updateContact(id, 'status', 'pending');
+  addTimelineEntry(id, 'Status resetovan na: pending');
+  toast('🔄 Status resetovan');
+  render();
+}
 
-  var content=document.getElementById('aiContent');
-  content.innerHTML+='<div class="ai-msg user-msg">'+msg+'</div>';
-  content.innerHTML+='<div class="ai-msg bot-msg" id="aiThinking">🤖 Razmišljam...</div>';
-  content.scrollTop=content.scrollHeight;
-
-  setTimeout(function(){
-    var thinking=document.getElementById('aiThinking');
-    if(thinking){
-      thinking.innerHTML=getAIResponse(msg);
-      thinking.removeAttribute('id');
-      content.scrollTop=content.scrollHeight;
+function toggleComment(id) {
+  var el = document.getElementById('comment-' + id);
+  if (el) {
+    el.classList.toggle('open');
+    if (el.classList.contains('open')) {
+      var ta = el.querySelector('textarea');
+      if (ta) ta.focus();
     }
-  },800);
-}
-
-function getAIResponse(msg){
-  var m=msg.toLowerCase();
-  var contacts=getContacts();
-  var done=contacts.filter(function(c){return c.status==='done'}).length;
-  var total=contacts.length;
-
-  if(m.indexOf('statistika')>=0||m.indexOf('koliko')>=0||m.indexOf('pregled')>=0){
-    return '📊 <strong>Statistike:</strong><br>Ukupno: '+total+'<br>Završeno: '+done+'<br>U toku: '+(total-done)+
-      '<br>Stopa završenih: '+Math.round(done/total*100)+'%';
   }
-  if(m.indexOf('savjet')>=0||m.indexOf('preporuka')>=0||m.indexOf('kako')>=0){
-    return '💡 <strong>Savjet:</strong> Fokusirajte se na kontakate koji su još u toku. Probajte personalizirani pristup.';
-  }
-  if(m.indexOf('kategorij')>=0){
-    var cats={};
-    contacts.forEach(function(c){cats[c.category]=(cats[c.category]||0)+1});
-    var sorted=Object.keys(cats).sort(function(a,b){return cats[b]-cats[a]});
-    return '📌 <strong>Kategorije:</strong><br>'+sorted.map(function(c){return c+': '+cats[c]}).join('<br>');
-  }
-  if(m.indexOf('držav')>=0||m.indexOf('bosn')>=0||m.indexOf('hrvats')>=0||m.indexOf('srbij')>=0){
-    var byC={};
-    contacts.forEach(function(c){byC[c.country]=(byC[c.country]||0)+1});
-    return '🌍 <strong>Po državama:</strong><br>'+
-      Object.keys(byC).map(function(c){return FLAGS[c]+' '+COUNTRIES[c]+': '+byC[c]}).join('<br>');
-  }
-  if(m.indexOf('prodaj')>=0){
-    var sales=contacts.filter(function(c){return c.sale==='yes'}).length;
-    return '💰 <strong>Prodaja:</strong> '+sales+' uspješnih od '+done+' završenih.<br>Stopa: '+Math.round(sales/done*100)+'%';
-  }
-  return '🤖 Mogu vam pomoći sa: Statistike, Savjeti, Kategorije, Države, Prodaja.';
 }
 
-/* ═══════════════════════════════════════════
-   DATA
-   ═══════════════════════════════════════════ */
-function getContacts(){
-  var stored=localStorage.getItem('lf-contacts');
-  if(stored) return JSON.parse(stored);
-  if(typeof LEAD_DATA!=='undefined') return LEAD_DATA;
-  return [];
+function saveContactComment(id, value) {
+  updateContact(id, 'comments', value);
+  toast('💬 Komentar spremljen');
 }
 
-function saveContacts(data){
-  localStorage.setItem('lf-contacts',JSON.stringify(data));
+function toggleSaleInline(id) {
+  var contacts = getContacts();
+  if (!contacts[id]) return;
+  var c = contacts[id];
+  if (c.saleOutcome === 'success') c.saleOutcome = '';
+  else c.saleOutcome = 'success';
+  addTimelineEntry(id, 'Prodaja: ' + (c.saleOutcome === 'success' ? 'Uspješna' : 'Poništena'));
+  saveContacts(contacts);
+  toast(c.saleOutcome === 'success' ? '💰 Prodaja zabilježena!' : '💰 Prodaja poništena');
+  render();
 }
 
-/* ═══════════════════════════════════════════
-   TOAST & MOBILE
-   ═══════════════════════════════════════════ */
-function showToast(msg,type){
-  var toast=document.createElement('div');
-  toast.className='toast '+(type||'');
-  toast.textContent=msg;
-  document.getElementById('toastBox').appendChild(toast);
-  setTimeout(function(){toast.classList.add('show')},10);
-  setTimeout(function(){toast.classList.remove('show');setTimeout(function(){toast.remove()},300)},2500);
+function toggleDemoInline(id) {
+  var contacts = getContacts();
+  if (!contacts[id]) return;
+  var c = contacts[id];
+  c.demoSent = !c.demoSent;
+  addTimelineEntry(id, 'Demo: ' + (c.demoSent ? 'Poslan' : 'Nije poslan'));
+  saveContacts(contacts);
+  toast(c.demoSent ? '📧 Demo označen kao poslan' : '📧 Demo poništen');
+  render();
 }
 
-function toggleMobileSidebar(){
-  var sb=document.getElementById('sidebarIcons');
-  sidebar_open=!sidebar_open;
-  sb.classList.toggle('mobile-open',sidebar_open);
-}
+/* ═══════════════════════════════════════════════════════════════
+   10. ADD FORM
+   ═══════════════════════════════════════════════════════════════ */
+
+function renderAddForm() {
+  var h = '';
+  h += '<div class="add-form" id="addForm">';
+  h += '<div style="font-family:var(--font-h);font-weight:600;font-size:.88rem;margin-bottom:12px">➕ Dodaj novi kontakt</div>';
+  h += '<div class="form-grid">';
+  h += formField('af-company', 'Naziv firme *', 'text', '', true

@@ -1,0 +1,196 @@
+/* ═══════════════════════════════════════════════════════════
+   LeadFlow Premium CSS — Part 1: Variables, Reset, Login
+   ═══════════════════════════════════════════════════════════ */
+
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --accent: #00ffaa;
+  --accent-glow: rgba(0,255,170,0.25);
+  --accent-dim: #00cc88;
+  --bg: #06060c;
+  --bg2: #0c0c16;
+  --surface: rgba(255,255,255,0.03);
+  --surface-hover: rgba(255,255,255,0.06);
+  --surface-border: rgba(255,255,255,0.06);
+  --text: #e8eaf0;
+  --text-dim: rgba(255,255,255,0.45);
+  --text-muted: rgba(255,255,255,0.25);
+  --danger: #ff4466;
+  --success: #00ffaa;
+  --warning: #ffaa00;
+  --glass: rgba(12,12,22,0.75);
+  --glass-border: rgba(255,255,255,0.08);
+  --radius: 16px;
+  --radius-sm: 10px;
+  --radius-xs: 6px;
+  --shadow: 0 8px 32px rgba(0,0,0,0.4);
+  --shadow-glow: 0 0 40px rgba(0,255,170,0.1);
+  --transition: 0.3s cubic-bezier(0.4,0,0.2,1);
+  --font: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-display: 'Space Grotesk', sans-serif;
+}
+
+[data-theme="light"] {
+  --bg: #f0f2f5;
+  --bg2: #e4e7ec;
+  --surface: rgba(255,255,255,0.85);
+  --surface-hover: rgba(255,255,255,0.95);
+  --surface-border: rgba(0,0,0,0.06);
+  --text: #1a1a2e;
+  --text-dim: rgba(0,0,0,0.5);
+  --text-muted: rgba(0,0,0,0.25);
+  --glass: rgba(255,255,255,0.8);
+  --glass-border: rgba(0,0,0,0.06);
+  --shadow: 0 8px 32px rgba(0,0,0,0.08);
+  --shadow-glow: 0 0 40px rgba(0,255,170,0.06);
+}
+
+[data-theme="deep-space"] {
+  --bg: #020010;
+  --bg2: #060020;
+  --surface: rgba(80,0,180,0.08);
+  --surface-hover: rgba(80,0,180,0.14);
+  --surface-border: rgba(120,40,255,0.12);
+  --accent: #aa77ff;
+  --accent-glow: rgba(170,119,255,0.25);
+  --accent-dim: #8855dd;
+  --glass: rgba(20,0,50,0.8);
+  --glass-border: rgba(120,40,255,0.15);
+}
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { font-size: 16px; -webkit-font-smoothing: antialiased; }
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 3px; opacity: 0.4; }
+::-webkit-scrollbar-thumb:hover { opacity: 1; }
+
+/* ── Three.js Canvas ── */
+#threeBg {
+  position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+  z-index: 0; pointer-events: none;
+}
+
+/* ── Noise Overlay ── */
+.noise-overlay {
+  position: fixed; inset: 0; z-index: 1; pointer-events: none;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 128px;
+}
+
+/* ── LOGIN ── */
+.login-overlay {
+  position: fixed; inset: 0; z-index: 100;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--bg);
+}
+
+.login-box {
+  width: 420px; max-width: 92vw;
+  background: var(--glass);
+  backdrop-filter: blur(40px) saturate(1.4);
+  -webkit-backdrop-filter: blur(40px) saturate(1.4);
+  border: 1px solid var(--glass-border);
+  border-radius: 24px;
+  padding: 48px 40px;
+  box-shadow: var(--shadow), var(--shadow-glow);
+  text-align: center;
+  animation: loginFadeIn 0.8s ease-out;
+}
+
+@keyframes loginFadeIn {
+  from { opacity: 0; transform: translateY(30px) scale(0.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.login-logo {
+  font-family: var(--font-display);
+  font-size: 2.4rem; font-weight: 700;
+  letter-spacing: -1px;
+  margin-bottom: 4px;
+}
+.login-logo .g { color: var(--accent); }
+.login-sub {
+  font-size: 0.85rem; color: var(--text-dim);
+  margin-bottom: 32px; font-weight: 400;
+}
+
+.login-avatars {
+  display: grid; grid-template-columns: repeat(4,1fr);
+  gap: 10px; margin-bottom: 28px;
+}
+
+.avatar-card {
+  background: var(--surface);
+  border: 2px solid var(--surface-border);
+  border-radius: var(--radius-sm);
+  padding: 14px 6px 12px;
+  cursor: pointer;
+  transition: var(--transition);
+  text-align: center;
+}
+.avatar-card:hover {
+  background: var(--surface-hover);
+  border-color: var(--accent);
+  transform: translateY(-3px);
+  box-shadow: 0 4px 20px var(--accent-glow);
+}
+.avatar-card.selected {
+  border-color: var(--accent);
+  background: var(--accent-glow);
+  box-shadow: 0 0 24px var(--accent-glow);
+}
+.avatar-emoji { font-size: 1.8rem; margin-bottom: 6px; }
+.avatar-name { font-size: 0.7rem; font-weight: 600; line-height: 1.2; }
+.avatar-role { font-size: 0.6rem; color: var(--text-dim); margin-top: 2px; }
+
+.login-field {
+  position: relative; margin-bottom: 20px; text-align: left;
+}
+.login-field label {
+  display: block; font-size: 0.75rem; color: var(--text-dim);
+  margin-bottom: 6px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px;
+}
+.login-field input {
+  width: 100%; padding: 14px 16px;
+  background: var(--surface); border: 1px solid var(--surface-border);
+  border-radius: var(--radius-xs); color: var(--text);
+  font-size: 0.95rem; font-family: var(--font);
+  outline: none; transition: var(--transition);
+}
+.login-field input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+.login-field input::placeholder { color: var(--text-muted); }
+
+.login-btn {
+  width: 100%; padding: 14px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-dim));
+  border: none; border-radius: var(--radius-xs);
+  color: #000; font-weight: 700; font-size: 0.95rem;
+  font-family: var(--font); cursor: pointer;
+  transition: var(--transition);
+  text-transform: uppercase; letter-spacing: 1px;
+}
+.login-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 30px var(--accent-glow);
+}
+.login-btn:active { transform: translateY(0); }
+
+.login-err {
+  color: var(--danger); font-size: 0.8rem; margin-top: 12px; min-height: 18px;
+}
