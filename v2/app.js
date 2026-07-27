@@ -1,270 +1,623 @@
-/* LeadFlow v2 — App Logic */
-var currentUser=null,currentView='overview',currentCountry='ba',currentAgent=null,selectedContact=null,aiTab='chat';
-var COUNTRY_FLAGS={ba:'\uD83C\uDDE7\uD83C\uDDEE',hr:'\uD83C\uDDED\uD83C\uDDDD',rs:'\uD83C\uDDF7\uD83C\uDDF8'};
-var COUNTRY_NAMES={ba:'Bosna i Hercegovina',hr:'Hrvatska',rs:'Srbija'};
-var CAT_ICONS={'Frizerski salon':'\u2702\uFE0F','Kozmetički salon':'\uD83D\uDC86','Restoran':'\uD83C\uDF7D\uFE0F','Auto servis':'\uD83D\uDD27','Caffe bar':'\u2615','Trgovina':'\uD83D\uDED2','Stolarija':'\uD83E\uDE9F','Cvjećara':'\uD83C\uDF38','Autopraonica':'\uD83D\uDE97','Auto dijelovi':'\u2699\uFE0F','Optika':'\uD83D\uDC53','Trgovina odjećom':'\uD83D\uDC57','Električar':'\u26A1','Putnička agencija':'\u2708\uFE0F','Hotel':'\uD83C\uDFE8','Advokat':'\u2696\uFE0F','Računovodstvo':'\uD83D\uDCCA','Fitness':'\uD83D\uDCAA','Pekara':'\uD83E\uDD50','Autolimar':'\uD83D\uDD28','Građevinska':'\uD83C\uDFD7\uFE0F','Stomatologija':'\uD83E\uDDB7','Knjižara':'\uD83D\uDCDA','Fitness studio':'\uD83D\uDCAA','Auto':'\uD83D\uDE97'};
+/* LeadFlow Platform v2 — Full App Logic */
+(function(){
+'use strict';
 
-var AI_SCRIPTS=[
-  {title:'Telefonski poziv \u2014 Hladni poziv',desc:'Struktura poziva: Predstavljanje \u2192 Problem \u2192 Rje\u0161enje \u2192 Termin',tag:'Sales',country:'all'},
-  {title:'Follow-up email nakon poziva',desc:'Template emaila sa personaliziranom porukom i CTA',tag:'Email',country:'all'},
-  {title:'Analiza konkurencije \u2014 tr\u017Ei\u0161te BiH',desc:'Kako analizirati konkurenciju i prona\u0107i USP za klijenta',tag:'Analiza',country:'ba'},
-  {title:'Lokalni SEO za male biznise',desc:'Koraci za optimizaciju Google My Business profila',tag:'Marketing',country:'all'},
-  {title:'Social media strategija',desc:'Kreiranje sadr\u017Eaja za Instagram/Facebook lokalnog biznisa',tag:'Marketing',country:'all'},
-  {title:'Pregovara\u010Dke vje\u0161tine \u2014 Cijena',desc:'Kako pregovarati o cijeni bez gubitka vrijednosti',tag:'Sales',country:'all'},
-  {title:'Scenarij: Klijent ka\u017Ee "Previ\u0161e je"',desc:'Odgovori na naj\u010De\u0167\u0107e prigovore tokom prodaje',tag:'Script',country:'all'},
-  {title:'Analiza portfelja klijenata',desc:'Kategorizacija klijenata po prioritetu i potencijalu',tag:'Analiza',country:'all'}
+/* ═══════════════════════════════════════════
+   CONFIG & STATE
+   ═══════════════════════════════════════════ */
+var USERS=[
+  {id:'natasa',name:'Nataša Damnjanović',role:'Agent – BiH',avatar:'👩‍💼',color:'#00ffaa',password:'lead2024'},
+  {id:'ana',name:'Ana Marić',role:'Agent – Hrvatska',avatar:'👩‍💻',color:'#00ccff',password:'lead2024'},
+  {id:'marko',name:'Marko Petrović',role:'Agent – Srbija',avatar:'👨‍💼',color:'#ff00aa',password:'lead2024'},
+  {id:'admin',name:'Admin',role:'Administrator',avatar:'👑',color:'#ffaa00',password:'admin123'}
 ];
 
-function aiGetContext(){
-  if(!selectedContact)return 'Op\u0107enito';
-  return selectedContact.company+' ('+selectedContact.city+', '+selectedContact.cat+')';
-}
-function aiGenerateReply(msg){
-  var ctx=aiGetContext();
-  var lower=msg.toLowerCase();
-  if(lower.indexOf('poziv')!==-1||lower.indexOf('telefon')!==-1||lower.indexOf('zvati')!==-1){
-    return '\uD83D\uDCDE <strong>Strategija poziva za '+ctx+'</strong><br><br>1. <strong>Priprema:</strong> Pro\u010Ditaj bilje\u0161ke o klijentu prije poziva<br>2. <strong>Uvod:</strong> "Dobar dan, zovem iz LeadFlow agencije..."<br>3. <strong>Vrijednost:</strong> Fokusiraj se na problem koji rje\u0161avate<br>4. <strong>CTA:</strong> Predlo\u017Ei sastanak ili demo<br><br>Trajanje poziva: max 3-5 minuta.';
-  }
-  if(lower.indexOf('email')!==-1||lower.indexOf('poruk')!==-1){
-    return '\u2709\uFE0F <strong>Template emaila za '+ctx+'</strong><br><br><code>Zdravo [Ime],<br><br>Vidio sam va\u0161 biznis u [Grad] i imam ideju koja bi vam mogla pomo\u0107i da privu\u010Dete vi\u0161e klijenata.<br><br>Biste li imali 15 minuta za kratki razgovor?<br><br>Lijep pozdrav</code><br><br>Personaliziraj uvod.';
-  }
-  if(lower.indexOf('cijen')!==-1||lower.indexOf('skupo')!==-1||lower.indexOf('budget')!==-1){
-    return '\uD83D\uDCB0 <strong>Pregovori o cijeni za '+ctx+'</strong><br><br>Klijenti \u010Desto ka\u017Eu "previ\u0161e je" \u2014 to nije odbijanje.<br><br>\u2705 <strong>Tipi\u010Dni prigovori:</strong><br>\u2022 "Nemam bud\u017Eet" \u2192 "Koliki ROI o\u010Dekujete za X mjeseci?"<br>\u2022 "Skupo je" \u2192 "Koliko vas ko\u0161ta da NEMATE web?"<br>\u2022 "Razmisli \u0107u" \u2192 "\u0160ta vas najvi\u0161e zanima da razjasnim?"';
-  }
-  if(lower.indexOf('analiz')!==-1||lower.indexOf('statist')!==-1){
-    var contacts=getUserContacts(currentUser.id);
-    var done=contacts.filter(function(c){return c.status==='done'}).length;
-    var prog=contacts.filter(function(c){return c.status==='in_progress'}).length;
-    var pend=contacts.filter(function(c){return c.status==='pending'}).length;
-    var cal=contacts.filter(function(c){return c.called}).length;
-    return '\uD83D\uDCCA <strong>Analiza portfelja \u2014 '+currentUser.name+'</strong><br><br>\u2022 Ukupno kontakata: <strong>'+contacts.length+'</strong><br>\u2022 Zavr\u0161eno: <strong>'+done+'</strong><br>\u2022 U toku: <strong>'+prog+'</strong><br>\u2022 \u010Ceka: <strong>'+pend+'</strong><br>\u2022 Pozvano: <strong>'+cal+'</strong><br><br>\uD83D\uDCC8 <strong>Preporuka:</strong> '+(pend>done?'Fokusiraj se na '+pend+' nepozvanih.':'Odli\u010Dan rad! Nastavi s follow-up pozivima.');
-  }
-  if(lower.indexOf('konkurenc')!==-1||lower.indexOf('konkurent')!==-1){
-    return '\uD83D\uDD0D <strong>Analiza konkurencije \u2014 '+ctx+'</strong><br><br>1. <strong>Google Maps:</strong> Provjeri recenzije konkurenata<br>2. <strong>Web prisutnost:</strong> Imaju li web, Instagram, Facebook?<br>3. <strong>Cijene:</strong> Jesu li skuplji ili jeftiniji?<br>4. <strong>USP:</strong> \u0160ta TI mo\u017Ee\u0161 ponuditi \u0161to oni ne mogu?';
-  }
-  if(lower.indexOf('seo')!==-1||lower.indexOf('google')!==-1){
-    return '\uD83D\uDD0E <strong>Lokalni SEO za '+ctx+'</strong><br><br>1. <strong>Google My Business:</strong> Postavi profil sa slikama<br>2. <strong>Recenzije:</strong> Tra\u017Ei od klijenata da ostave recenziju<br>3. <strong>Klju\u010Dne rije\u010Di:</strong> "[kategorija] u [grad]"<br>4. <strong>Fotografije:</strong> Redovito objavljuj slike rada';
-  }
-  return '\uD83E\uDD16 <strong>AI Mentor \u2014 '+ctx+'</strong><br><br>Pitaj me o:<br>\u2022 <strong>"Poziv"</strong> \u2014 strategija poziva<br>\u2022 <strong>"Email"</strong> \u2014 template emaila<br>\u2022 <strong>"Cijena"</strong> \u2014 pregovori<br>\u2022 <strong>"Analiza"</strong> \u2014 pregled portfelja<br>\u2022 <strong>"Konkurencija"</strong> \u2014 analiza konkurenata<br>\u2022 <strong>"SEO"</strong> \u2014 lokalni SEO savjeti';
+var COUNTRIES={ba:'Bosna i Hercegovina',hr:'Hrvatska',rs:'Srbija'};
+var FLAGS={ba:'🇧🇦',hr:'🇭🇷',rs:'🇷🇸'};
+
+var CAT_ICONS={
+  'Frizerski salon':'✂️','Kozmetički salon':'💆','Restoran':'🍽️','Auto servis':'🔧',
+  'Caffe bar':'☕','Trgovina':'🛒','Stolarija':'🪵','Cvjećara':'🌸',
+  'Autopraonica':'🚗','Auto dijelovi':'⚙️','Optika':'👓','Trgovina odjećom':'👖',
+  'Električar':'⚡','Putnička agencija':'✈️','Hotel':'🏨','Advokat':'⚖️',
+  'Računovodstvo':'📊','Fitness':'💪','Pekara':'🥐','Autolimar':'🔨',
+  'Građevinska':'🏗️','Stomatologija':'🦷','Knjižar':'📚','Fitness studio':'🏋️','Auto':'🚗'
+};
+
+var current_user=null, current_view='overview', current_country='ba', selected=null;
+var sidebar_open=false, ai_open=false, theme_panel_open=false;
+
+/* ═══════════════════════════════════════════
+   INIT
+   ═══════════════════════════════════════════ */
+document.addEventListener('DOMContentLoaded',function(){
+  initTheme();
+  initParticles();
+  showLogin();
+  document.getElementById('doLogin').addEventListener('click',doLogin);
+  document.getElementById('loginPass').addEventListener('keydown',function(e){if(e.key==='Enter')doLogin()});
+});
+
+/* ═══════════════════════════════════════════
+   THEME
+   ═══════════════════════════════════════════ */
+function initTheme(){
+  var saved=localStorage.getItem('lf-theme')||'dark';
+  var accent=localStorage.getItem('lf-accent')||'#00ffaa';
+  document.documentElement.setAttribute('data-theme',saved);
+  document.documentElement.style.setProperty('--accent',accent);
+  document.documentElement.style.setProperty('--accent-glow',accent+'33');
 }
 
-function doLogin(userId,pass){
-  var u=USERS.find(function(x){return x.id===userId});
-  if(!u||u.pass!==pass)return false;
-  currentUser=u;
-  localStorage.setItem(DB+'_session',JSON.stringify({id:u.id}));
-  return true;
-}
-function tryRestoreSession(){
-  try{var s=JSON.parse(localStorage.getItem(DB+'_session'));if(s){currentUser=USERS.find(function(x){return x.id===s.id});return!!currentUser}}catch(e){return false}
-}
-function doLogout(){currentUser=null;localStorage.removeItem(DB+'_session');showLogin()}
-function showLogin(){document.getElementById('loginOverlay').classList.remove('hidden');document.getElementById('appLayout').classList.remove('active')}
-function showApp(){document.getElementById('loginOverlay').classList.add('hidden');document.getElementById('appLayout').classList.add('active');
-  if(currentUser.country!=='all'){currentCountry=currentUser.country;currentAgent=currentUser.id;currentView='agent-contacts'}
-  render()}
+window.toggleThemePanel=function(){
+  theme_panel_open=!theme_panel_open;
+  var p=document.getElementById('themePanel');
+  p.style.display=theme_panel_open?'block':'none';
+  if(theme_panel_open) renderThemeOptions();
+};
 
-function switchView(v){currentView=v;currentAgent=null;selectedContact=null;render()}
-function switchCountry(c){currentCountry=c;currentAgent=null;selectedContact=null;autoSelectIfSingle();render()}
-function selectAgent(uid){currentAgent=uid;currentView='agent-contacts';selectedContact=null;render()}
-function autoSelectIfSingle(){
-  /* When non-admin user clicks their country, auto-open their contacts */
-  if(currentUser.country!=='all'){
-    currentAgent=currentUser.id;
-    currentView='agent-contacts';
+function renderThemeOptions(){
+  var el=document.getElementById('themeOptions');
+  var themes=[
+    {name:'Dark',val:'dark'},{name:'Light',val:'light'},{name:'Deep Space',val:'deep-space'}
+  ];
+  var accents=['#00ffaa','#00ccff','#ff00aa','#ffaa00','#aa66ff','#ff4444','#44ff44'];
+  var h='';
+  themes.forEach(function(t){
+    var active=document.documentElement.getAttribute('data-theme')===t.val;
+    h+='<button class="theme-opt'+(active?' active':'')+'" onclick="setTheme(\''+t.val+'\')">'+t.name+'</button>';
+  });
+  h+='<div style="margin-top:12px;font-size:11px;opacity:.5">Accent</div><div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap">';
+  accents.forEach(function(c){
+    var cur=getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();
+    h+='<div onclick="setAccent(\''+c+'\')" style="width:28px;height:28px;border-radius:50%;background:'+c+';cursor:pointer;border:2px solid '+(cur===c?'#fff':'transparent')+';box-shadow:0 0 8px '+c+'44"></div>';
+  });
+  h+='</div>';
+  el.innerHTML=h;
+}
+
+window.setTheme=function(t){
+  document.documentElement.setAttribute('data-theme',t);
+  localStorage.setItem('lf-theme',t);
+  renderThemeOptions();
+};
+
+window.setAccent=function(c){
+  document.documentElement.style.setProperty('--accent',c);
+  document.documentElement.style.setProperty('--accent-glow',c+'33');
+  localStorage.setItem('lf-accent',c);
+  renderThemeOptions();
+};
+
+/* ═══════════════════════════════════════════
+   PARTICLES
+   ═══════════════════════════════════════════ */
+function initParticles(){
+  var canvas=document.getElementById('particleCanvas');
+  if(!canvas) return;
+  var ctx=canvas.getContext('2d');
+  var particles=[];
+  function resize(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;}
+  resize();
+  window.addEventListener('resize',resize);
+  for(var i=0;i<60;i++){
+    particles.push({
+      x:Math.random()*canvas.width, y:Math.random()*canvas.height,
+      vx:(Math.random()-.5)*.3, vy:(Math.random()-.5)*.3,
+      r:Math.random()*2+.5, a:Math.random()*.4+.1
+    });
   }
-}
-function selectContact(c){selectedContact=c;renderAIContent()}
-
-function render(){
-  updateTopbar();updateSidebar();
-  var cs=document.getElementById('contentScroll');
-  if(currentView==='overview')renderOverview(cs);
-  else if(currentView==='country')renderCountry(cs);
-  else if(currentView==='agent-contacts')renderAgentContacts(cs);
-  renderAIContent();
-}
-function updateTopbar(){
-  document.getElementById('topTitle').textContent=currentUser.name;
-  var bc='';
-  if(currentView==='overview')bc='Pregled';
-  else if(currentView==='country')bc=COUNTRY_FLAGS[currentCountry]+' '+COUNTRY_NAMES[currentCountry];
-  else if(currentView==='agent-contacts'){var ag=USERS.find(function(x){return x.id===currentAgent});bc=ag?ag.name:''}
-  document.getElementById('topBC').textContent=bc;
-  document.getElementById('topAvatar').style.background=currentUser.color;
-  document.getElementById('topAvatar').textContent=currentUser.initials;
-}
-function updateSidebar(){
-  var sb=document.getElementById('sidebarIcons');
-  var icons=[{id:'overview',icon:'\uD83D\uDCCA',tip:'Pregled'}];
-  if(currentUser.country==='all'){
-    icons.push({id:'ba',icon:'\uD83C\uDDE7\uD83C\uDDEE',tip:'BiH'});
-    icons.push({id:'hr',icon:'\uD83C\uDDED\uD83C\uDDDD',tip:'Hrvatska'});
-    icons.push({id:'rs',icon:'\uD83C\uDDF7\uD83C\uDDF8',tip:'Srbija'});
-  }else{
-    icons.push({id:currentUser.country,icon:COUNTRY_FLAGS[currentUser.country],tip:COUNTRY_NAMES[currentUser.country]});
+  function draw(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    var accent=getComputedStyle(document.documentElement).getPropertyValue('--accent').trim()||'#00ffaa';
+    particles.forEach(function(p){
+      p.x+=p.vx; p.y+=p.vy;
+      if(p.x<0)p.x=canvas.width; if(p.x>canvas.width)p.x=0;
+      if(p.y<0)p.y=canvas.height; if(p.y>canvas.height)p.y=0;
+      ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      ctx.fillStyle=accent; ctx.globalAlpha=p.a; ctx.fill();
+    });
+    ctx.globalAlpha=1;
+    requestAnimationFrame(draw);
   }
-  sb.innerHTML=icons.map(function(i){
-    var active=(currentView===i.id||(currentView==='country'&&currentCountry===i.id)||(currentView==='agent-contacts'&&currentCountry===i.id))?'active':'';
-    var fn=i.id==='overview'?"switchView('overview')":"switchCountry('"+i.id+"')";
-    return '<button class="sidebar-icon '+active+'" onclick="'+fn+'" title="'+i.tip+'">'+i.icon+'</button>';
-  }).join('')+'<div class="sidebar-sep"></div><button class="sidebar-icon" onclick="toggleAIRight()" title="AI Mentor">\uD83E\uDD16</button><div class="sidebar-bottom"><div class="sidebar-sep"></div><button class="sidebar-icon" onclick="doLogout()" title="Odjavi se">\uD83D\uDEAA</button></div>';
+  draw();
 }
 
+/* ═══════════════════════════════════════════
+   LOGIN
+   ═══════════════════════════════════════════ */
+function showLogin(){
+  var el=document.getElementById('loginAvatars');
+  var h='';
+  USERS.forEach(function(u){
+    h+='<div class="avatar-card" onclick="selectAvatar(\''+u.id+'\')" id="av-'+u.id+'">';
+    h+='<div class="avatar-emoji">'+u.avatar+'</div>';
+    h+='<div class="avatar-name">'+u.name+'</div>';
+    h+='<div class="avatar-role">'+u.role+'</div></div>';
+  });
+  el.innerHTML=h;
+}
+
+window.selectAvatar=function(id){
+  document.querySelectorAll('.avatar-card').forEach(function(c){c.classList.remove('selected')});
+  var card=document.getElementById('av-'+id);
+  if(card) card.classList.add('selected');
+  current_user=USERS.find(function(u){return u.id===id});
+  document.getElementById('loginPass').focus();
+};
+
+function doLogin(){
+  if(!current_user){showToast('Odaberi profil!','error');return;}
+  var pass=document.getElementById('loginPass').value;
+  if(pass!==current_user.password){
+    document.getElementById('loginErr').textContent='Pogrešna lozinka!';
+    return;
+  }
+  document.getElementById('loginOverlay').style.display='none';
+  document.getElementById('appLayout').style.display='flex';
+  initApp();
+}
+
+/* ═══════════════════════════════════════════
+   APP INIT
+   ═══════════════════════════════════════════ */
+function initApp(){
+  renderSidebar();
+  renderTopbar();
+  navigateTo('overview');
+  renderThemeSwitcher();
+}
+
+function renderSidebar(){
+  var items=[
+    {id:'overview',icon:'📊',label:'Pregled'},
+    {id:'ba',icon:'🇧🇦',label:'BiH'},
+    {id:'hr',icon:'🇭🇷',label:'Hrvatska'},
+    {id:'rs',icon:'🇷🇸',label:'Srbija'},
+    {id:'tarot',icon:'🔮',label:'Tarot'},
+    {id:'settings',icon:'⚙️',label:'Postavke'}
+  ];
+  var el=document.getElementById('sidebarIcons');
+  var h='';
+  items.forEach(function(it){
+    var active=(it.id===current_view||(it.id===current_country&&current_view==='country'))?' active':'';
+    h+='<div class="sidebar-item'+active+'" onclick="navigateTo(\''+it.id+'\')">';
+    h+='<div class="sidebar-icon">'+it.icon+'</div>';
+    h+='<div class="sidebar-label">'+it.label+'</div></div>';
+  });
+  el.innerHTML=h;
+}
+
+function renderTopbar(){
+  var title='Pregled';
+  if(current_view==='country') title=FLAGS[current_country]+' '+COUNTRIES[current_country];
+  else if(current_view==='tarot') title='🔮 Tarot dnevnik';
+  else if(current_view==='settings') title='⚙️ Postavke';
+  document.getElementById('topTitle').textContent=title;
+  document.getElementById('topAvatar').innerHTML=current_user.avatar;
+  if(document.getElementById('topAvatarTitle'))
+    document.getElementById('topAvatarTitle').textContent=current_user.name;
+}
+
+function renderThemeSwitcher(){
+  document.getElementById('themeSwitcher').style.display='flex';
+}
+
+window.navigateTo=function(id){
+  if(['ba','hr','rs'].indexOf(id)>=0){
+    current_country=id; current_view='country';
+  } else {
+    current_view=id;
+  }
+  renderSidebar();
+  renderTopbar();
+  renderContent();
+};
+
+function renderContent(){
+  var el=document.getElementById('contentScroll');
+  if(current_view==='overview') renderOverview(el);
+  else if(current_view==='country') renderCountry(el);
+  else if(current_view==='tarot') renderTarot(el);
+  else if(current_view==='settings') renderSettings(el);
+}
+
+/* ═══════════════════════════════════════════
+   OVERVIEW
+   ═══════════════════════════════════════════ */
 function renderOverview(el){
-  var all=getAllContacts();
-  var stats={ba:{total:0,done:0,agents:{}},hr:{total:0,done:0,agents:{}},rs:{total:0,done:0,agents:{}}};
-  all.forEach(function(c){if(!stats[c.country])return;stats[c.country].total++;if(c.status==='done')stats[c.country].done++;if(!stats[c.country].agents[c.owner])stats[c.country].agents[c.owner]=0;stats[c.country].agents[c.owner]++});
-  var canSee=(currentUser.country==='all')?['ba','hr','rs']:[currentUser.country];
-  el.innerHTML='<div class="country-tabs"><button class="country-tab active">\uD83D\uDCCA Sve zemlje</button></div><div class="overview-grid">'+canSee.map(function(co){
-    var s=stats[co]||{total:0,done:0,agents:{}};
-    var pct=s.total?Math.round(s.done/s.total*100):0;
-    var teamsHtml=Object.keys(s.agents).map(function(uid){
-      var u=USERS.find(function(x){return x.id===uid});
-      return '<div class="oc-team"><span style="color:var(--text)">'+(u?u.name:uid)+'</span><span style="color:var(--accent);font-weight:600">'+s.agents[uid]+'</span></div>';
-    }).join('');
-    return '<div class="overview-card '+co+'"><div class="oc-flag">'+COUNTRY_FLAGS[co]+'</div><div class="oc-name">'+COUNTRY_NAMES[co]+'</div><div class="oc-count">'+s.total+' kontakata \u00B7 '+pct+'% zavr\u0161eno</div><div class="oc-teams">'+teamsHtml+'</div></div>';
-  }).join('')+'</div>';
+  var all=getContacts();
+  var total=all.length;
+  var done=all.filter(function(c){return c.status==='done'}).length;
+  var pending=total-done;
+  var sale_yes=all.filter(function(c){return c.sale==='yes'}).length;
+  var categories={};
+  all.forEach(function(c){categories[c.category]=(categories[c.category]||0)+1});
+  var topCats=Object.keys(categories).sort(function(a,b){return categories[b]-categories[a]}).slice(0,5);
+
+  var h='<div class="overview-grid">';
+  // Stats cards
+  h+=statCard('📋','Ukupno leadova',total);
+  h+=statCard('✅','Završeno',done);
+  h+=statCard('⏳','U toku',pending);
+  h+=statCard('💰','Prodaja uspjela',sale_yes);
+  h+='</div>';
+
+  // Categories
+  h+='<div class="section-title">Top kategorije</div><div class="cat-grid">';
+  topCats.forEach(function(cat){
+    h+='<div class="cat-pill">'+(CAT_ICONS[cat]||'📌')+' '+cat+' <span class="cat-count">'+categories[cat]+'</span></div>';
+  });
+  h+='</div>';
+
+  // Per-country
+  h+='<div class="section-title">Po državama</div><div class="overview-grid">';
+  Object.keys(COUNTRIES).forEach(function(cc){
+    var cc_contacts=all.filter(function(c){return c.country===cc});
+    h+='<div class="stat-card clickable" onclick="navigateTo(\''+cc+'\')">';
+    h+='<div class="stat-icon">'+FLAGS[cc]+'</div>';
+    h+='<div class="stat-label">'+COUNTRIES[cc]+'</div>';
+    h+='<div class="stat-value">'+cc_contacts.length+'</div></div>';
+  });
+  h+='</div>';
+
+  el.innerHTML=h;
 }
 
+function statCard(icon,label,value){
+  return '<div class="stat-card"><div class="stat-icon">'+icon+'</div><div class="stat-value">'+value+'</div><div class="stat-label">'+label+'</div></div>';
+}
+
+/* ═══════════════════════════════════════════
+   COUNTRY VIEW
+   ═══════════════════════════════════════════ */
 function renderCountry(el){
-  var contacts=getCountryContacts(currentCountry);
-  var agents={};
-  contacts.forEach(function(c){if(!agents[c.owner])agents[c.owner]=0;agents[c.owner]++});
-  var canSee=(currentUser.country==='all')?Object.keys(agents):[currentUser.id];
-  var agentUsers=canSee.filter(function(uid){return agents[uid]}).map(function(uid){return USERS.find(function(x){return x.id===uid})}).filter(Boolean);
-  el.innerHTML='<div class="country-tabs">'+
-  ['ba','hr','rs'].map(function(co){
-    var cls=currentCountry===co?'active':'';
-    var cnt=getCountryContacts(co).length;
-    return '<button class="country-tab '+cls+'" onclick="switchCountry(\''+co+'\')">'+COUNTRY_FLAGS[co]+' '+COUNTRY_NAMES[co]+' <span class="ct">'+cnt+'</span></button>';
-  }).join('')+'</div><div class="team-grid">'+agentUsers.map(function(u){
-    var uc=contacts.filter(function(c){return c.owner===u.id});
-    var done=uc.filter(function(c){return c.status==='done'}).length;
-    var prog=uc.filter(function(c){return c.status==='in_progress'}).length;
-    return '<div class="team-card" onclick="selectAgent(\''+u.id+'\')"><div class="team-av" style="background:'+u.color+';color:#000">'+u.initials+'</div><div class="team-name">'+u.name+'</div><div class="team-role">'+u.role+'</div><div class="team-stats"><div class="team-stat"><div class="team-stat-val">'+uc.length+'</div><div class="team-stat-lbl">Ukupno</div></div><div class="team-stat"><div class="team-stat-val" style="color:var(--success)">'+done+'</div><div class="team-stat-lbl">Zavr\u0161eno</div></div><div class="team-stat"><div class="team-stat-val" style="color:var(--info)">'+prog+'</div><div class="team-stat-lbl">U toku</div></div></div></div>';
-  }).join('')+'</div>';
+  var contacts=getContacts().filter(function(c){return c.country===current_country});
+  var agents=getAgentsForCountry(current_country);
+
+  var h='<div class="country-header">';
+  h+='<div class="country-flag-big">'+FLAGS[current_country]+'</div>';
+  h+='<div class="country-stats">';
+  h+='<span>'+contacts.length+' kontakata</span>';
+  h+='<span>'+contacts.filter(function(c){return c.status==='done'}).length+' završeno</span>';
+  h+='</div></div>';
+
+  // Agent tabs
+  if(agents.length>0){
+    h+='<div class="agent-tabs">';
+    h+='<div class="agent-tab active" onclick="filterAgent(null,this)">Svi</div>';
+    agents.forEach(function(a){
+      h+='<div class="agent-tab" onclick="filterAgent(\''+a.id+'\',this)">'+a.avatar+' '+a.name.split(' ')[0]+'</div>';
+    });
+    h+='</div>';
+  }
+
+  // Search
+  h+='<div class="search-bar"><input type="text" placeholder="🔍 Pretraži kontakate..." id="searchInput" oninput="filterContacts()"></div>';
+
+  // Contact list
+  h+='<div class="contact-list" id="contactList">';
+  contacts.forEach(function(c){ h+=contactCard(c); });
+  h+='</div>';
+
+  el.innerHTML=h;
 }
 
-function renderAgentContacts(el){
-  var contacts=getUserContacts(currentAgent);
-  var agent=USERS.find(function(x){return x.id===currentAgent});
-  var pend=contacts.filter(function(c){return c.status==='pending'}).length;
-  var prog=contacts.filter(function(c){return c.status==='in_progress'}).length;
-  var done=contacts.filter(function(c){return c.status==='done'}).length;
-  var pct=contacts.length?Math.round(done/contacts.length*100):0;
-  el.innerHTML='<div class="country-tabs"><button class="country-tab active" onclick="switchCountry(\''+currentCountry+'\')">'+COUNTRY_FLAGS[currentCountry]+' '+COUNTRY_NAMES[currentCountry]+'</button></div>'+
-  '<div class="bento"><div class="bento-card"><div class="b-icon" style="background:rgba(185,255,102,.1);color:var(--accent)"><pre></div><div class="b-val">'+contacts.length+'</div><div class="b-lbl">Ukupno</div></div>'+
-  '<div class="bento-card"><div class="b-icon" style="background:rgba(251,191,36,.1);color:#fbbf24">\u23F3</div><div class="b-val" style="color:#fbbf24">'+pend+'</div><div class="b-lbl">\u010Ceka</div></div>'+
-  '<div class="bento-card"><div class="b-icon" style="background:rgba(56,189,248,.1);color:#38bdf8">\uD83D\uDD04</div><div class="b-val" style="color:#38bdf8">'+prog+'</div><div class="b-lbl">U toku</div></div>'+
-  '<div class="bento-card"><div class="b-icon" style="background:rgba(52,211,153,.1);color:#34d399">\u2705</div><div class="b-val" style="color:#34d399">'+pct+'%</div><div class="b-lbl">Zavr\u0161eno</div></div></div>'+
-  '<div style="display:flex;gap:8px;margin-bottom:14px;align-items:center"><button class="btn-primary" onclick="toggleAddForm()">+ Dodaj kontakt</button><span style="font-size:.78rem;color:var(--text3)">'+agent.name+'</span></div>'+
-  '<div class="add-form" id="addForm"><div class="form-grid">'+
-  '<div class="form-field"><label>Ime</label><input id="afFirst" placeholder="Ime"></div>'+
-  '<div class="form-field"><label>Prezime</label><input id="afLast" placeholder="Prezime"></div>'+
-  '<div class="form-field full"><label>Firma</label><input id="afCompany" placeholder="Naziv firme"></div>'+
-  '<div class="form-field"><label>Grad</label><input id="afCity" placeholder="Grad"></div>'+
-  '<div class="form-field"><label>Kategorija</label><input id="afCat" placeholder="npr. Frizerski salon"></div>'+
-  '<div class="form-field"><label>Telefon</label><input id="afPhone" placeholder="+387..."></div>'+
-  '<div class="form-field"><label>Email</label><input id="afEmail" placeholder="email@example.com"></div>'+
-  '<div class="form-field full"><label>Bilje\u0161ke</label><textarea id="afNotes" placeholder="Dodatne informacije..."></textarea></div>'+
-  '</div><div class="form-actions"><button class="btn-ghost" onclick="toggleAddForm()">Otka\u017Ei</button><button class="btn-primary" onclick="submitContact()">Spremi</button></div></div>'+
-  '<div class="contact-list" id="contactList">'+contacts.map(function(c){
-    var ini=(c.company||'?').split(' ').slice(0,2).map(function(w){return w[0]||''}).join('').toUpperCase();
-    var sc=c.status==='done'?'s-done':c.status==='in_progress'?'s-progress':'s-pending';
-    var sl=c.status==='done'?'\u2705 Zavr\u0161eno':c.status==='in_progress'?'\u23F3 U toku':'\u23F3 \u010Ceka';
-    var sel=selectedContact&&selectedContact._id===c._id?'selected':'';
-    return '<div class="contact-item '+sel+'" onclick=\'selectContact('+JSON.stringify(c).replace(/'/g,"\\'")+')\'>'+
-    '<div class="ci-avatar" style="background:linear-gradient(135deg,'+(agent?agent.color:'#b9ff66')+'33,'+(agent?agent.color:'#39ff14')+'22)">'+ini+'</div>'+
-    '<div class="ci-info"><div class="ci-name">'+c.company+'</div><div class="ci-meta"><span class="city">'+(CAT_ICONS[c.cat]||'\uD83D\uDCCB')+' '+c.cat+'</span> \u00B7 '+c.city+'</div></div>'+
-    '<div class="ci-status '+sc+'">'+sl+'</div></div>';
-  }).join('')+'</div>';
+function getAgentsForCountry(cc){
+  if(cc==='ba') return USERS.filter(function(u){return u.id==='natasa'||u.id==='admin'});
+  if(cc==='hr') return USERS.filter(function(u){return u.id==='ana'||u.id==='admin'});
+  if(cc==='rs') return USERS.filter(function(u){return u.id==='marko'||u.id==='admin'});
+  return [];
 }
 
-function toggleAddForm(){var f=document.getElementById('addForm');if(f)f.classList.toggle('open')}
-function submitContact(){
-  var c={owner:currentAgent,country:currentCountry,first:document.getElementById('afFirst').value.trim(),last:document.getElementById('afLast').value.trim(),company:document.getElementById('afCompany').value.trim(),city:document.getElementById('afCity').value.trim(),cat:document.getElementById('afCat').value.trim(),phone:document.getElementById('afPhone').value.trim(),email:document.getElementById('afEmail').value.trim(),notes:document.getElementById('afNotes').value.trim(),status:'pending',called:false,customNotes:''};
-  if(!c.company){toast('\u26A0\uFE0F Unesi naziv firme');return}
-  addContact(c);toggleAddForm();toast('\u2705 Kontakt dodan');render();
+function contactCard(c){
+  var statusClass=c.status==='done'?'done':'pending';
+  var saleBadge='';
+  if(c.status==='done'){
+    saleBadge=c.sale==='yes'?'<span class="badge badge-success">✅ Prodaja</span>':'<span class="badge badge-fail">❌ Bez prodaje</span>';
+  }
+  return '<div class="contact-card '+statusClass+'" data-id="'+c.id+'" onclick="openContact(\''+c.id+'\')">'+
+    '<div class="cc-top"><div class="cc-name">'+c.name+'</div>'+
+    '<div class="cc-company">'+c.company+'</div></div>'+
+    '<div class="cc-bottom"><span class="cc-cat">'+(CAT_ICONS[c.category]||'📌')+' '+c.category+'</span>'+
+    '<span class="cc-phone">📞 '+c.phone+'</span>'+
+    saleBadge+'</div>'+
+    (c.comment?'<div class="cc-comment">💬 '+c.comment.substring(0,60)+(c.comment.length>60?'...':'')+'</div>':'')+
+    '</div>';
 }
 
-function toggleAIRight(){document.getElementById('sidebarRight').classList.toggle('show')}
-function renderAIContent(){
-  if(!currentUser)return;
-  var tabsEl=document.getElementById('aiTabs');
-  tabsEl.innerHTML=['chat','notes','scripts'].map(function(t){
-    var labels={chat:'\uD83D\uDCAC Chat',notes:'\uD83D\uDCDD Bilje\u0161ke',scripts:'\uD83D\uDCDC Skripte'};
-    return '<div class="ai-tab '+(aiTab===t?'active':'')+'" onclick="switchAITab(\''+t+'\')">'+labels[t]+'</div>';
-  }).join('');
-  var el=document.getElementById('aiContent');
-  if(aiTab==='chat')renderAIChat(el);
-  else if(aiTab==='notes')renderAINotes(el);
-  else if(aiTab==='scripts')renderAIScripts(el);
+window.filterContacts=function(){
+  var q=(document.getElementById('searchInput')||{}).value||'';
+  q=q.toLowerCase();
+  var cards=document.querySelectorAll('.contact-card');
+  cards.forEach(function(card){
+    var id=card.getAttribute('data-id');
+    var c=getContacts().find(function(x){return x.id===id});
+    if(!c) return;
+    var match=c.name.toLowerCase().indexOf(q)>=0||c.company.toLowerCase().indexOf(q)>=0||c.category.toLowerCase().indexOf(q)>=0||c.phone.indexOf(q)>=0;
+    card.style.display=match?'':'none';
+  });
+};
+
+window.filterAgent=function(agentId,tabEl){
+  document.querySelectorAll('.agent-tab').forEach(function(t){t.classList.remove('active')});
+  if(tabEl) tabEl.classList.add('active');
+  // For now just visual — real agent filtering would need agent field on contacts
+};
+
+/* ═══════════════════════════════════════════
+   CONTACT DETAIL MODAL
+   ═══════════════════════════════════════════ */
+window.openContact=function(id){
+  selected=getContacts().find(function(c){return c.id===id});
+  if(!selected) return;
+  var c=selected;
+  var box=document.getElementById('contactModalBox');
+
+  var h='<div class="modal-header">';
+  h+='<div class="modal-avatar">'+(CAT_ICONS[c.category]||'📌')+'</div>';
+  h+='<div><div class="modal-name">'+c.name+'</div>';
+  h+='<div class="modal-company">'+c.company+'</div></div>';
+  h+='<button class="modal-close" onclick="closeContactModal()">✕</button></div>';
+
+  h+='<div class="modal-info-grid">';
+  h+='<div class="modal-info"><span class="mi-label">📞 Telefon</span><span class="mi-val">'+c.phone+'</span></div>';
+  if(c.email) h+='<div class="modal-info"><span class="mi-label">✉️ Email</span><span class="mi-val">'+c.email+'</span></div>';
+  h+='<div class="modal-info"><span class="mi-label">📌 Kategorija</span><span class="mi-val">'+c.category+'</span></div>';
+  h+='<div class="modal-info"><span class="mi-label">🌍 Država</span><span class="mi-val">'+FLAGS[c.country]+' '+COUNTRIES[c.country]+'</span></div>';
+  if(c.owner) h+='<div class="modal-info"><span class="mi-label">👤 Vlasnik</span><span class="mi-val">'+c.owner+'</span></div>';
+  h+='</div>';
+
+  // Status controls
+  h+='<div class="modal-section-title">Status</div>';
+  h+='<div class="status-controls">';
+  h+='<button class="status-btn '+(c.status==='done'?'active-done':'')+'" onclick="setStatus(\''+c.id+'\',\'done\')">✅ Završeno</button>';
+  h+='<button class="status-btn '+(c.status==='pending'?'active-pending':'')+'" onclick="setStatus(\''+c.id+'\',\'pending\')">⏳ U toku</button>';
+  h+='</div>';
+
+  if(c.status==='done'){
+    h+='<div class="modal-section-title">Prodaja</div>';
+    h+='<div class="status-controls">';
+    <h+='<button class="sale-btn '+(c.sale==='yes'?'active-yes':'')+'" onclick="setSale(\''+c.id+'\',\'yes\')">💰 Uspješna</button>';
+    h+='<button class="sale-btn '+(c.sale==='no'?'active-no':'')+'" onclick="setSale(\''+c.id+'\',\'no\')">🚫 Neuspješna</button>';
+    h+='</div>';
+  }
+
+  // Comment
+  h+='<div class="modal-section-title">Komentar</div>';
+  h+='<textarea class="comment-input" id="commentInput" placeholder="Dodaj komentar..." rows="3">'+(c.comment||'')+'</textarea>';
+  h+='<button class="save-comment-btn" onclick="saveComment(\''+c.id+'\')">💾 Spremi komentar</button>';
+
+  box.innerHTML=h;
+  document.getElementById('contactModal').style.display='flex';
+};
+
+window.closeContactModal=function(){
+  document.getElementById('contactModal').style.display='none';
+  selected=null;
+};
+
+window.setStatus=function(id,status){
+  var contacts=getContacts();
+  var c=contacts.find(function(x){return x.id===id});
+  if(c){c.status=status;c.sale=status==='pending'?null:c.sale;}
+  saveContacts(contacts);
+  openContact(id);
+  renderContent();
+  showToast(status==='done'?'✅ Kontakt označen kao završen':'⏳ Kontakt vraćen u toku');
+};
+
+window.setSale=function(id,val){
+  var contacts=getContacts();
+  var c=contacts.find(function(x){return x.id===id});
+  if(c) c.sale=val;
+  saveContacts(contacts);
+  openContact(id);
+  showToast(val==='yes'?'💰 Prodaja zabilježena!':'🚫 Prodaja označena kao neuspješna');
+};
+
+window.saveComment=function(id){
+  var val=(document.getElementById('commentInput')||{}).value||'';
+  var contacts=getContacts();
+  var c=contacts.find(function(x){return x.id===id});
+  if(c) c.comment=val;
+  saveContacts(contacts);
+  showToast('💬 Komentar spremljen');
+};
+
+/* ═══════════════════════════════════════════
+   TAROT
+   ═══════════════════════════════════════════ */
+var TAROT_CARDS=[
+  {name:'The Fool',emoji:'🃏',meaning:'Novi počeci, avantura, nevinost'},
+  {name:'The Magician',emoji:'🎩',meaning:'Manifestacija, vještina, volja'},
+  {name:'The High Priestess',emoji:'🌙',meaning:'Intuicija, tajne, podsvijest'},
+  {name:'The Empress',emoji:'👑',meaning:'Plodnost, ljepota, priroda'},
+  {name:'The Emperor',emoji:'🏛️',meaning:'Autoritet, struktura, stabilnost'},
+  {name:'The Hierophant',emoji:'📿',meaning:'Tradicionalno znanje, vjera'},
+  {name:'The Lovers',emoji:'💕',meaning:'Ljubav, izbor, harmonija'},
+  {name:'The Chariot',emoji:'🏎️',meaning:'Pobjeda, odlučnost, snaga'},
+  {name:'Strength',emoji:'🦁',meaning:'Unutarnja snaga, hrabrost'},
+  {name:'The Hermit',emoji:'🏔️',meaning:'Mudrost, unutrašnje traženje'},
+  {name:'Wheel of Fortune',emoji:'🎡',meaning:'Sudbina, ciklusi, promjene'},
+  {name:'The Star',emoji:'⭐',meaning:'Nada, inspiracija, mir'},
+  {name:'The Moon',emoji:'🌕',meaning:'Iluzije, strahovi, podsvijest'},
+  {name:'The Sun',emoji:'☀️',meaning:'Sreća, uspjeh, energija'},
+  {name:'Judgement',emoji:'📯',meaning:'Buđenje, poziv, procjena'},
+  {name:'The World',emoji:'🌍',meaning:'Završetak, postignuće, putovanje'}
+];
+
+function renderTarot(el){
+  var history=JSON.parse(localStorage.getItem('lf-tarot')||'[]');
+  var h='<div class="tarot-container">';
+  h+='<div class="tarot-title">🔮 Dnevnik tarot karata</div>';
+  h+='<div class="tarot-subtitle">Povuci kartu za današnji dan</div>';
+  h+='<button class="tarot-pull-btn" onclick="pullTarot()">✨ Vuci kartu</button>';
+  h+='<div id="tarotResult"></div>';
+
+  if(history.length>0){
+    h+='<div class="tarot-history-title">Prethodna izvlačenja</div>';
+    history.slice(-10).reverse().forEach(function(entry){
+      h+='<div class="tarot-entry">';
+      h+='<div class="tarot-entry-date">'+entry.date+'</div>';
+      h+='<div class="tarot-entry-card">'+entry.card.emoji+' <strong>'+entry.card.name+'</strong></div>';
+      h+='<div class="tarot-entry-meaning">'+entry.card.meaning+'</div>';
+      if(entry.note) h+='<div class="tarot-entry-note">📝 '+entry.note+'</div>';
+      h+='</div>';
+    });
+  }
+  h+='</div>';
+  el.innerHTML=h;
 }
-function switchAITab(t){aiTab=t;renderAIContent()}
-function renderAIChat(el){
-  var ctx=aiGetContext();
-  el.innerHTML='<div class="ai-msg mentor"><div class="ml">\uD83E\uDD16 AI Mentor</div><div class="mt">Zdravo '+currentUser.name.split(' ')[0]+'! Gleda\u0161: <strong>'+ctx+'</strong><br><br>Kako ti mogu pomo\u0107i?</div></div>'+
-  '<div class="ai-suggest"><button onclick="aiQuick(\'Kako da pozovem ovog klijenta?\')">\uD83D\uDCDE Poziv</button><button onclick="aiQuick(\'Napi\u0161i mi email template\')">\u2709\uFE0F Email</button><button onclick="aiQuick(\'Kako da pregovaram o cijeni?\')">\uD83D\uDCB0 Cijena</button><button onclick="aiQuick(\'Daj mi analizu mog portfelja\')">\uD83D\uDCCA Analiza</button></div>'+
-  '<div id="aiMessages"></div>';
-  document.getElementById('aiInput').value='';
+
+window.pullTarot=function(){
+  var card=TAROT_CARDS[Math.floor(Math.random()*TAROT_CARDS.length)];
+  var today=new Date().toLocaleDateString('bs-BA');
+  var history=JSON.parse(localStorage.getItem('lf-tarot')||'[]');
+
+  // Check if already pulled today
+  var todayEntry=history.find(function(e){return e.date===today});
+  if(todayEntry){
+    document.getElementById('tarotResult').innerHTML=
+      '<div class="tarot-pulled">'+todayEntry.card.emoji+'<div class="tp-name">'+todayEntry.card.name+'</div>'+
+      '<div class="tp-meaning">'+todayEntry.card.meaning+'</div>'+
+      '<div class="tp-date">Već izvučeno danas</div></div>';
+    return;
+  }
+
+  var note=prompt('Dodaj bilješku za današnju kartu (opcionalno):')||'';
+  history.push({date:today,card:card,note:note});
+  localStorage.setItem('lf-tarot',JSON.stringify(history));
+
+  document.getElementById('tarotResult').innerHTML=
+    '<div class="tarot-pulled animate">'+card.emoji+'<div class="tp-name">'+card.name+'</div>'+
+    '<div class="tp-meaning">'+card.meaning+'</div>'+
+    (note?'<div class="tp-note">📝 '+note+'</div>':'')+
+    '<div class="tp-date">'+today+'</div></div>';
+};
+
+/* ═══════════════════════════════════════════
+   SETTINGS
+   ═══════════════════════════════════════════ */
+function renderSettings(el){
+  var h='<div class="settings-container">';
+  h+='<div class="settings-title">⚙️ Postavke</div>';
+  h+='<div class="setting-group">';
+  h+='<div class="setting-label">Trenutni korisnik</div>';
+  h+='<div class="setting-val">'+current_user.avatar+' '+current_user.name+' ('+current_user.role+')</div></div>';
+  h+='<div class="setting-group">';
+  h+='<div class="setting-label">Ukupno kontakata</div>';
+  h+='<div class="setting-val">'+getContacts().length+'</div></div>';
+  h+='<div class="setting-group">';
+  h+='<div class="setting-label">Izlaz</div>';
+  h+='<button class="logout-btn" onclick="doLogout()">🚪 Odjavi se</button></div>';
+  h+='</div>';
+  el.innerHTML=h;
 }
-function aiQuick(msg){document.getElementById('aiInput').value=msg;aiSend()}
-function aiSend(){
+
+window.doLogout=function(){
+  current_user=null;
+  document.getElementById('appLayout').style.display='none';
+  document.getElementById('loginOverlay').style.display='flex';
+  document.getElementById('loginPass').value='';
+  document.querySelectorAll('.avatar-card').forEach(function(c){c.classList.remove('selected')});
+};
+
+/* ═══════════════════════════════════════════
+   AI MENTOR
+   ═══════════════════════════════════════════ */
+window.toggleAIRight=function(){
+  ai_open=!ai_open;
+  var sb=document.getElementById('sidebarRight');
+  sb.style.display=ai_open?'flex':'none';
+};
+
+window.aiSend=function(){
   var input=document.getElementById('aiInput');
   var msg=input.value.trim();
-  if(!msg)return;
-  var msgs=document.getElementById('aiMessages');
-  msgs.innerHTML+='<div class="ai-msg user"><div class="ml">Ti</div><div class="mt">'+msg+'</div></div>';
-  msgs.innerHTML+='<div class="ai-msg mentor"><div class="ml">\uD83E\uDD16 AI Mentor</div><div class="mt">'+aiGenerateReply(msg)+'</div></div>';
-  input.value='';msgs.parentElement.scrollTop=msgs.parentElement.scrollHeight;
-}
-function renderAINotes(el){
-  if(!selectedContact){el.innerHTML='<div class="ai-msg mentor"><div class="ml">\uD83D\uDCDD Bilje\u0161ke</div><div class="mt">Odaberi kontakt sa strane da vidi\u0161 bilje\u0161ke.</div></div>';return}
-  var c=selectedContact;
-  el.innerHTML='<div class="ai-msg mentor" style="background:rgba(185,255,102,.04);border-color:rgba(185,255,102,.1)"><div class="ml">'+c.company+'</div><div class="mt"><strong>'+c.city+'</strong> \u00B7 '+c.cat+(c.phone?'<br>\uD83D\uDCDE '+c.phone:'')+(c.email?'<br>\u2709\uFE0F '+c.email:'')+'</div></div>'+
-  '<div style="margin-top:4px"><label style="display:block;font-size:.65rem;font-weight:600;text-transform:uppercase;color:var(--text3);margin-bottom:4px">Bilje\u0161ke za klijenta</label>'+
-  '<textarea id="notesTA" style="width:100%;min-height:100px;padding:10px;border-radius:8px;border:1px solid var(--glass-border);background:rgba(255,255,255,.03);color:var(--text);font-family:var(--font-b);font-size:.82rem;resize:vertical;outline:none" onblur="saveNotes(\''+c._id+'\',this.value)">'+(c.customNotes||'')+'</textarea></div>'+
-  '<div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap">'+
-  '<button class="btn-ghost" style="font-size:.72rem;padding:5px 10px" onclick="cycleStatus(\''+c._id+'\')">'+(c.status==='done'?'\u21A9\uFE0F Reset status':c.status==='in_progress'?'\u2705 Zavr\u0161eno':'\u23F3 U toku')+'</button>'+
-  '<button class="btn-ghost" style="font-size:.72rem;padding:5px 10px" onclick="toggleCalled(\''+c._id+'\')">'+(c.called?'\u21A9\uFE0F Nije zvano':'\uD83D\uDCDE Zvali')+'</button>'+
-  '<button class="btn-ghost" style="font-size:.72rem;padding:5px 10px;color:var(--danger)" onclick="delContact(\''+c._id+'\')">\uD83D\uDDD1\uFE0F Obri\u0161i</button></div>';
-}
-function saveNotes(id,v){updateContact(id,'customNotes',v);toast('\uD83D\uDCDD Bilje\u0161ke spremljene')}
-function cycleStatus(id){var all=getContacts(),c=all[id];if(!c)return;var n={pending:'in_progress',in_progress:'done',done:'pending'};updateContact(id,'status',n[c.status]);selectedContact=getContacts()[id];render();toast('\u2705 Status a\u017Euriran')}
-function toggleCalled(id){var all=getContacts(),c=all[id];if(!c)return;updateContact(id,'called',!c.called);selectedContact=getContacts()[id];render();toast(c.called?'\u21A9\uFE0F Nije zvano':'\uD83D\uDCDE Zvali')}
-function delContact(id){if(confirm('Obrisati kontakt?')){deleteContact(id);selectedContact=null;render();toast('\uD83D\uDDD1\uFE0F Kontakt obrisan')}}
-function renderAIScripts(el){
-  var filtered=AI_SCRIPTS.filter(function(s){return s.country==='all'||s.country===currentUser.country});
-  el.innerHTML=filtered.map(function(s){
-    return '<div class="script-card" onclick="aiQuick(\'Objasni mi: '+s.title+'\')"><div class="sc-t">'+s.title+'</div><div class="sc-d">'+s.desc+'</div><div class="sc-tag">'+s.tag+'</div></div>';
-  }).join('');
-}
-function toast(msg){var c=document.getElementById('toastBox'),t=document.createElement('div');t.className='toast';t.textContent=msg;c.appendChild(t);setTimeout(function(){t.remove()},2500)}
-function initLoginAvatars(){
-  var el=document.getElementById('loginAvatars');
-  if(!el)return;
-  el.innerHTML=USERS.map(function(u){
-    return '<div class="login-av" style="background:'+u.color+';color:#000" data-uid="'+u.id+'" onclick="selectLoginUser(\''+u.id+'\',this)">'+u.initials+'<div class="login-av-name">'+u.name.split(' ')[0]+'</div></div>';
-  }).join('');
-  document.getElementById('doLogin').addEventListener('click',function(){
-    var uid=document.querySelector('.login-av.sel')?document.querySelector('.login-av.sel').getAttribute('data-uid'):null;
-    var pass=document.getElementById('loginPass').value;
-    if(!uid){showLoginErr('Odaberi korisnika');return}
-    if(doLogin(uid,pass))showApp();
-    else showLoginErr('Neto\u010Dna lozinka');
-  });
-}
-function selectLoginUser(uid,el){
-  document.querySelectorAll('.login-av').forEach(function(e){e.classList.remove('sel')});
-  el.classList.add('sel');
-  document.getElementById('loginPass').focus();
-}
-function showLoginErr(msg){var e=document.getElementById('loginErr');e.textContent=msg;e.style.display='block';setTimeout(function(){e.style.display='none'},3000)}
+  if(!msg) return;
+  input.value='';
 
-window.addEventListener('DOMContentLoaded',function(){
-  seedContacts();
-  if(tryRestoreSession())showApp();
-  else showLogin();
-  initLoginAvatars();
-});
+  var content=document.getElementById('aiContent');
+  content.innerHTML+='<div class="ai-msg user-msg">'+msg+'</div>';
+  content.innerHTML+='<div class="ai-msg bot-msg" id="aiThinking">🤖 Razmišljam...</div>';
+  content.scrollTop=content.scrollHeight;
+
+  // Simple AI responses
+  setTimeout(function(){
+    var thinking=document.getElementById('aiThinking');
+    if(thinking){
+      var response=getAIResponse(msg);
+      thinking.innerHTML=response;
+      thinking.removeAttribute('id');
+      content.scrollTop=content.scrollHeight;
+    }
+  },800);
+};
+
+function getAIResponse(msg){
+  var m=msg.toLowerCase();
+  var contacts=getContacts();
+  var done=contacts.filter(function(c){return c.status==='done'}).length;
+  var total=contacts.length;
+
+  if(m.indexOf('statistika')>=0||m.indexOf('koliko')>=0||m.indexOf('pregled')>=0){
+    return '📊 <strong>Statistike:</strong><br>Ukupno: '+total+'<br>Završeno: '+done+'<br>U toku: '+(total-done)+
+      '<br>Stopa završenih: '+Math.round(done/total*100)+'%';
+  }
+  if(m.indexOf('savjet')>=0||m.indexOf('preporuka')>=0||m.indexOf('kako')>=0){
+    return '💡 <strong>Savjet:</strong> Fokusirajte se na kontakate koji su još u toku. Probajte personalizirani pristup — spomenite specifičnu djelatnost firme u poruci.';
+  }
+  if(m.indexOf('kategorij')>=0){
+    var cats={};
+    contacts.forEach(function(c){cats[c.category]=(cats[c.category]||0)+1});
+    var sorted=Object.keys(cats).sort(function(a,b){return cats[b]-cats[a]});
+    return '📌 <strong>Kategorije:</strong><br>'+sorted.map(function(c){return c+': '+cats[c]}).join('<br>');
+  }
+  if(m.indexOf('držav')>=0||m.indexOf('bosn')>=0||m.indexOf('hrvats')>=0||m.indexOf('srbij')>=0){
+    var byC={};
+    contacts.forEach(function(c){byC[c.country]=(byC[c.country]||0)+1});
+    return '🌍 <strong>Po državama:</strong><br>'+
+      Object.keys(byC).map(function(c){return FLAGS[c]+' '+COUNTRIES[c]+': '+byC[c]}).join('<br>');
+  }
+  if(m.indexOf('prodaj')>=0){
+    var sales=contacts.filter(function(c){return c.sale==='yes'}).length;
+    return '💰 <strong>Prodaja:</strong> '+sales+' uspješnih od '+done+' završenih kontakata.<br>Stopa: '+Math.round(sales/done*100)+'%';
+  }
+  return '🤖 Hvala na pitanju! Mogu vam pomoći sa:<br>• Statistike kontakata<br>• Savjeti za prodaju<br>• Pregled po kategorijama/državama<br>• Informacije o prodaji';
+}
+
+/* ═══════════════════════════════════════════
+   DATA PERSISTENCE
+   ═══════════════════════════════════════════ */
+function getContacts(){
+  var stored=localStorage.getItem('lf-contacts');
+  if(stored) return JSON.parse(stored);
+  // Load from data.js
+  if(typeof LEAD_DATA!=='undefined') return LEAD_DATA;
+  return [];
+}
+
+function saveContacts(data){
+  localStorage.setItem('lf-contacts',JSON.stringify(data));
+}
+
+/* ═══════════════════════════════════════════
+   TOAST
+   ═══════════════════════════════════════════ */
+function showToast(msg,type){
+  var toast=document.createElement('div');
+  toast.className='toast '+(type||'');
+  toast.textContent=msg;
+  document.getElementById('toastBox').appendChild(toast);
+  setTimeout(function(){toast.classList.add('show')},10);
+  setTimeout(function(){toast.classList.remove('show');setTimeout(function(){toast.remove()},300)},2500);
+}
+
+window.toggleMobileSidebar=function(){
+  var sb=document.getElementById('sidebarIcons');
+  sidebar_open=!sidebar_open;
+  sb.classList.toggle('mobile-open',sidebar_open);
+};
+
+})();

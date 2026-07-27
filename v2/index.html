@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="bs">
+<html lang="bs" data-theme="dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
@@ -10,6 +10,12 @@
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
+
+<!-- Particle Canvas -->
+<canvas id="particleCanvas"></canvas>
+
+<!-- Noise Overlay -->
+<div class="noise-overlay"></div>
 
 <!-- LOGIN -->
 <div class="login-overlay" id="loginOverlay">
@@ -34,6 +40,7 @@
   <!-- Main Area -->
   <div class="main-area">
     <div class="topbar">
+      <button class="hamburger" id="hamburgerBtn" onclick="toggleMobileSidebar()">☰</button>
       <div class="topbar-left">
         <div class="topbar-title" id="topTitle"></div>
         <div class="topbar-bc" id="topBC"></div>
@@ -54,6 +61,7 @@
         <div class="ai-title-text" id="topAvatarTitle"></div>
         <div class="ai-title-sub">AI Mentor</div>
       </div>
+      <button class="ai-close" onclick="toggleAIRight()">✕</button>
       <div class="ai-dot"></div>
     </div>
     <div class="ai-tabs" id="aiTabs"></div>
@@ -63,6 +71,25 @@
       <button class="ai-send" onclick="aiSend()">➤</button>
     </div>
   </div>
+</div>
+
+<!-- Contact Detail Modal -->
+<div class="modal-overlay" id="contactModal" onclick="if(event.target===this)closeContactModal()">
+  <div class="modal-box" id="contactModalBox"></div>
+</div>
+
+<!-- Theme Switcher -->
+<div class="theme-switcher" id="themeSwitcher" onclick="toggleThemePanel()">
+  <div class="theme-icon">🎨</div>
+  <div class="theme-panel" id="themePanel" onclick="event.stopPropagation()">
+    <div class="theme-panel-title">Tema</div>
+    <div class="theme-options" id="themeOptions"></div>
+  </div>
+</div>
+
+<!-- Tarot Section (hidden by default) -->
+<div class="tarot-overlay" id="tarotOverlay">
+  <div class="tarot-section" id="tarotSection"></div>
 </div>
 
 <div class="toast-box" id="toastBox"></div>
